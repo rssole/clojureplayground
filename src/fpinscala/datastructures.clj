@@ -61,7 +61,44 @@
   (loop [[h & t] xs]
     (if (not t)
       nil
-      (cons h (init t)))))
+      (cons h (init-fpins t)))))
 ;note that in answers - it is mentioned that there is another common
-;convention to do reversing - just like I did :)ooo
+;convention to do reversing - just like I did :)
+;-----------------------------------------------------------------------
+
+; fold-right as it is in fpins book (page 39)
+;it could be altered to use clojure's loop-recur but let it be like this
+(defn fold-right [as z f]
+  (let [[x & xs :as orig] as]
+    (if (nil? orig)
+      z
+      (f x (fold-right xs z f)))))
+
+;couple of more from fpins (page 39)
+(defn sum2 [xs]
+  (fold-right xs 0 #(+ % %2)))
+
+(defn product2 [xs]
+  (fold-right xs 1 #(* % %2)))
+
+;3.7 - I think not because of stack... how to skip over stack entries before
+;we spot 0.0?
+;-----------------------------------------------------------------------
+
+;3.8 - it yields equivalent list as input
+;check out for thorough explanation in exercises answers of fpins
+;-----------------------------------------------------------------------
+
+;3.9
+;mine
+(defn length [xs]
+  (fold-right xs 0 (fn [_ x] (+ x 1))))
+;fpins
+;conceptually - same :)
+;-----------------------------------------------------------------------
+
+;3.10
+;mine
+
+;
 ;-----------------------------------------------------------------------
