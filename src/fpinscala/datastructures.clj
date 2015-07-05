@@ -31,7 +31,7 @@
   (loop [cnt n l xs]
     (if (= cnt 0)
       l
-      (recur (dec cnt) (tail-option-2 l)))))                  ;There was bug in tail-option-2 (see above) which has been fixed
+      (recur (dec cnt) (tail-option-2 l)))))                ;There was bug in tail-option-2 (see above) which has been fixed
 ;fpinscala
 ;uses pattern matching but same/similar idea :)
 ;-----------------------------------------------------------------------
@@ -99,6 +99,43 @@
 
 ;3.10
 ;mine
-
+(defn fold-left [xs z f]
+  (loop [[x & others] xs acc z]
+    (if (nil? others)
+      (f x acc)
+      (recur others (f x acc)))))
 ;
+;fpins
+;relies on @tailrec scala annotation
+;and explicit recursive function invocation
+;but basically mine is equivalent solution as
+;clojure is using loop->recur for tail recursive calls
+;@annotation.tailrec
+;def foldLeft[A,B](l: List[A], z: B)(f: (B, A) => B): B = l match {
+; case Nil => z
+; case Cons (h, t) => foldLeft (t, f (z, h)) (f)
+; }
+;-----------------------------------------------------------------------
+
+;3.11
+;mine
+(defn sum-fl [xs]
+  (fold-left xs 0 +))
+(defn product-fl [xs]
+  (fold-left xs 1 *))
+(defn len-fl [xs]
+  (fold-left xs  0 (fn [_ x] (+ 1 x))))
+;fpins
+;All are basically same :)
+;-----------------------------------------------------------------------
+
+;3.12
+;mine
+(defn my-reverse [xs]
+  (fold-left xs '() cons))
+(defn my-reverse2 [xs]
+  (fold-right xs [] #(conj %2 %)))                           ;This is
+;way to do it with fold-right as list does not support adding at the end
+;fpins
+;It is done via f-l as in my first attempt
 ;-----------------------------------------------------------------------
