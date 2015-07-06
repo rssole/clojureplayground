@@ -256,3 +256,18 @@
 ;2) via mutable buffer - clojure equivalent would be via transient vector
 ;as to repeat clojure does not support transient list
 ;-----------------------------------------------------------------------
+
+;3.20
+;mine
+(defn flat-map [xs f]
+  (fold-r-via-fold-l xs '() (fn [x acc]
+                              (let [tx (f x)]
+                                (if (coll? tx)
+                                  (append tx acc)
+                                  (cons tx acc))))))
+;my solution is more general though, allowing transforming function not to
+;return list
+;fpins - strictly assumes transformin function returns list thus it is simpler
+(defn flat-map-fpins [xs f]
+  (list-concat-fpins (map-fpins-1 xs f)))
+;-----------------------------------------------------------------------
