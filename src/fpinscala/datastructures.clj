@@ -100,10 +100,12 @@
 ;3.10
 ;mine
 (defn fold-left [xs z f]
-  (loop [[x & others] xs acc z]
-    (if (nil? others)
-      (f x acc)
-      (recur others (f x acc)))))
+  (loop [[x & others :as original] xs acc z]
+    (if (nil? original)
+      acc
+      (recur others (f acc x)))))                           ;here it was (f x acc) thus
+;my fold-r-via-fold-l-1 didn't work :)
+;after swapping to (f acc x) it worked :)
 ;
 ;fpins
 ;relies on @tailrec scala annotation
@@ -115,6 +117,13 @@
 ; case Nil => z
 ; case Cons (h, t) => foldLeft (t, f (z, h)) (f)
 ; }
+; Actually - nope mine is not really equiv because below fold-r-via-fold-l-1 fails
+;this should be better:
+(defn fold-left-fpins [l z f]
+  (let [[h & t :as original] l]
+    (if (nil? original)
+      z
+      (fold-left-fpins t (f z h) f))))
 ;-----------------------------------------------------------------------
 
 ;3.11
@@ -124,7 +133,7 @@
 (defn product-fl [xs]
   (fold-left xs 1 *))
 (defn len-fl [xs]
-  (fold-left xs  0 (fn [_ x] (+ 1 x))))
+  (fold-left xs 0 (fn [_ x] (+ 1 x))))
 ;fpins
 ;All are basically same :)
 ;-----------------------------------------------------------------------
@@ -134,8 +143,52 @@
 (defn my-reverse [xs]
   (fold-left xs '() cons))
 (defn my-reverse2 [xs]
-  (fold-right xs [] #(conj %2 %)))                           ;This is
+  (fold-right xs [] #(conj %2 %)))                          ;This is
 ;way to do it with fold-right as list does not support adding at the end
 ;fpins
 ;It is done via f-l as in my first attempt
+;-----------------------------------------------------------------------
+
+;3.13
+;mine (I have cheated here and looked into answer but just for accumulator function :) )
+(defn fold-r-via-fold-l [xs z f]
+  (fold-left (my-reverse xs) z (fn [b a] (f a b))))
+(defn fold-r-via-fold-l-1 [xs z f]                          ; with my fold-left
+  ((fold-left xs (fn [b] b) (fn [g a]
+                              (fn [b]
+                                (g (f a b))))) z))
+;Check answer-rewrite below as I simply used answer :|
+;fpins
+;this is by the book literal translation as fold-left-fpins is literal translation as well (see above)
+(defn fold-r-via-fold-l-1-fpins [xs z f]
+  ((fold-left-fpins xs (fn [b] b) (fn [g a]
+                                    (fn [b]
+                                      (g (f a b))))) z))
+(defn fold-l-via-fold-r [xs z f]
+  ((fold-right xs (fn [b] b) (fn [a g]
+                               (fn [b]
+                                 (g (f b a))))) z))
+;-----------------------------------------------------------------------
+
+;3.14
+;mine
+(defn append [xs ys]
+  (fold-right xs ys cons))
+;fpins
+;basically - the same :)
+;-----------------------------------------------------------------------
+
+;3.15
+;mine
+;(defn list-concat [ls]
+;  (let [[h & t] ls]
+;    (fold-left t h #(append %2 %)))) ; before fixing append (swapped args xs ys)
+; there was ys xs before
+(defn list-concat [ls]
+  (let [[h & t] ls]
+    (fold-left t h append)))
+;fpins
+;they did it via fold right what is even better (more concise that is)
+(defn list-concat-fpins [ls]
+  (fold-right ls nil append))
 ;-----------------------------------------------------------------------
