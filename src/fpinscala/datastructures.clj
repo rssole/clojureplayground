@@ -141,7 +141,7 @@
 ;3.12
 ;mine
 (defn my-reverse [xs]
-  (fold-left xs '() cons))
+  (fold-left xs '() #(cons %2 %)))
 (defn my-reverse2 [xs]
   (fold-right xs [] #(conj %2 %)))                          ;This is
 ;way to do it with fold-right as list does not support adding at the end
@@ -153,7 +153,7 @@
 ;mine (I have cheated here and looked into answer but just for accumulator function :) )
 (defn fold-r-via-fold-l [xs z f]
   (fold-left (my-reverse xs) z (fn [b a] (f a b))))
-(defn fold-r-via-fold-l-1 [xs z f]                          ; with my fold-left
+(defn fold-r-via-fold-l-1 [xs z f]
   ((fold-left xs (fn [b] b) (fn [g a]
                               (fn [b]
                                 (g (f a b))))) z))
@@ -191,4 +191,68 @@
 ;they did it via fold right what is even better (more concise that is)
 (defn list-concat-fpins [ls]
   (fold-right ls nil append))
+;-----------------------------------------------------------------------
+
+;3.16
+;mine
+(defn add-one [xs]
+  (fold-right xs '() #(cons (inc %) %2)))
+;fpins
+;basically - the same :) I have tried with f-l but very wisely I forgot it
+;reverses list so not what is required
+;-----------------------------------------------------------------------
+
+;3.17
+;mine
+(defn to-str [xs]
+  (fold-right xs '() #(cons (str %) %2)))
+;fpins
+;basically - the same :)
+;-----------------------------------------------------------------------
+
+;3.18
+;mine
+(defn my-map [xs f]
+  (fold-right xs '() #(cons (f %) %2)))
+;fpins
+;multiple variations
+;0) using fold-right (but with note it is not stack safe) - same as mine
+;1) using fold-right-via-fold-left to preserve stack; check fold-r-via-fold-l variations above
+(defn map-fpins-1 [xs f]
+  (fold-r-via-fold-l xs '() #(cons (f %) %2)))
+;2) using local mutation - but mutation is not visible outside function
+;that is to quote fpins book: "mutation isn't observable outside the function"
+;here is my translation of it by means of transient list of clojure world :)
+(defn map-fpins-2 [xs f]
+  (loop [[x & others :as original] xs acc (transient [])]   ; clojure does not support transient list!
+    (if (nil? original)
+      (persistent! acc)                                     ;after mutating make it persistent!
+      (recur others (conj! acc (f x))))))                   ; for large collections it is faster :)
+;-----------------------------------------------------------------------
+
+;3.19 - this exercise for me was really eyes-opening :) to use fold-r
+;although I was thinking about utilizing fold-r I did with explicit loop :)
+;mine
+(defn my-filter [xs f]
+  (loop [[h & t :as original] xs acc '()]
+    (if (nil? original)
+      (my-reverse acc)
+      (if (f h)
+        (recur t (cons h acc))
+        (recur t acc)))))
+;fpins - definitely eyes-opening or better said: hitting into forehead :)
+;variations:
+;0) pure fold-r - same discussion as for map applies here: fold-r as
+; implemented here is not stack safe
+(defn filter-fpins [xs f]
+  (fold-right xs '() #(if (f %)
+                       (cons % %2)
+                       %2)))
+;1) fold-r-via-fold-l
+(defn filter-fpins-1 [xs f]
+  (fold-r-via-fold-l-1-fpins xs '() #(if (f %)
+                                      (cons % %2)
+                                      %2)))
+;2) via mutable buffer - clojure equivalent would be via transient vector
+;as to repeat clojure does not support transient list
 ;-----------------------------------------------------------------------
