@@ -31,7 +31,7 @@
 
 (fn [n]
   (map first (reductions
-    (fn [[a b] _] [b (+ a b)]) [1 1] (range 1 n))))
+               (fn [[a b] _] [b (+ a b)]) [1 1] (range 1 n))))
 
 (def input '((1 2) 3 [4 [5 6]]))
 
@@ -61,4 +61,9 @@
            fcrs (set (for [y rng] (gcd y x)))]
        (= x (reduce + fcrs))))) 8128)
 
-;Problem 77 - Anagram Finder
+;Problem 60 - Sequence reductions
+(defn seq-reds
+  ([f xs]
+   (loop [in-xs xs z (f) reds-acc []]
+     (when in-xs (lazy-seq ))))
+  ([f z xs]))

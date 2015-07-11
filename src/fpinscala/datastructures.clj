@@ -1,5 +1,10 @@
 (ns fpinscala.datastructures)
 
+(defn append [xs ys]
+  (if (nil? xs)
+    ys
+    (cons (first xs) (append (next xs) ys))))
+
 ;exercise 3.2
 ;mine
 (defn tail-option-1 [xs]
@@ -172,7 +177,7 @@
 
 ;3.14
 ;mine
-(defn append [xs ys]
+(defn append-via-fold-right [xs ys]
   (fold-right xs ys cons))
 ;fpins
 ;basically - the same :)
@@ -186,11 +191,11 @@
 ; there was ys xs before
 (defn list-concat [ls]
   (let [[h & t] ls]
-    (fold-left t h append)))
+    (fold-left t h append-via-fold-right)))
 ;fpins
 ;they did it via fold right what is even better (more concise that is)
 (defn list-concat-fpins [ls]
-  (fold-right ls nil append))
+  (fold-right ls nil append-via-fold-right))
 ;-----------------------------------------------------------------------
 
 ;3.16
@@ -262,12 +267,29 @@
 (defn flat-map [xs f]
   (fold-r-via-fold-l xs '() (fn [x acc]
                               (let [tx (f x)]
-                                (if (coll? tx)
-                                  (append tx acc)
-                                  (cons tx acc))))))
+                                (if (and (coll? tx) (not-empty tx))
+                                  (list-concat [tx acc])
+                                  (if (not (nil? tx))
+                                    (cons tx acc)
+                                    acc))))))               ;WHOA! :)
 ;my solution is more general though, allowing transforming function not to
-;return list
-;fpins - strictly assumes transformin function returns list thus it is simpler
+;return list - this function is heavily "cludged" to accomodate solution to 3.21 and
+;to keep ... "generality"... clap! clap! clap! :)
+
+;fpins - strictly assumes transforming function returns list thus it is simpler
 (defn flat-map-fpins [xs f]
   (list-concat-fpins (map-fpins-1 xs f)))
 ;-----------------------------------------------------------------------
+
+;3.21
+;mine
+(defn filter-via-flat-map [xs f]
+  (flat-map xs (fn [x]
+                 (if (f x)
+                   (list x)
+                   nil))))
+;fpins
+(defn filter-via-flat-map-fpins [xs f]
+  (flat-map-fpins xs #(if (f %) (list %) nil)))
+;-----------------------------------------------------------------------
+
