@@ -1,4 +1,5 @@
-(ns fpinscala.datastructures)
+(ns fpinscala.datastructures
+  (:use clojure.test))
 
 (defn append [xs ys]
   (if (nil? xs)
@@ -274,7 +275,7 @@
                                     acc))))))               ;WHOA! :)
 ;my solution is more general though, allowing transforming function not to
 ;return list - this function is heavily "cludged" to accomodate solution to 3.21 and
-;to keep ... "generality"... clap! clap! clap! :)
+;to keep ... "generality"... clap! clap! clap! :) (ironical self-criticsm)
 
 ;fpins - strictly assumes transforming function returns list thus it is simpler
 (defn flat-map-fpins [xs f]
@@ -293,3 +294,42 @@
   (flat-map-fpins xs #(if (f %) (list %) nil)))
 ;-----------------------------------------------------------------------
 
+;3.22
+;mine
+(with-test
+  (defn add-lists [xs ys]
+    (letfn [(go [xs ys acc]
+                (if (or (empty? xs) (empty? ys))
+                  (list* acc)
+                  (recur (next xs) (next ys) (conj acc (+ (first xs) (first ys))))))]
+      (go xs ys [])))
+  (is (= '(5 7 9) (add-lists '(1 2 3) '(4 5 6)))))
+;fpins
+(with-test
+  (defn add-lists-fpins [xs ys]
+    (if (or (nil? xs) (nil? ys))
+      nil
+      (let [[h1 & t1] xs [h2 & t2] ys]
+        (cons (+ h1 h2) (add-lists-fpins t1 t2)))))
+  (is (= '(5 7 9) (add-lists-fpins '(1 2 3) '(4 5 6)))))
+;-----------------------------------------------------------------------
+
+;3.23
+;mine
+(with-test
+  (defn zip-with [xs ys f]
+    (letfn [(go [xs ys acc]
+                (if (or (empty? xs) (empty? ys))
+                  (list* acc)
+                  (recur (next xs) (next ys) (conj acc (f (first xs) (first ys))))))]
+      (go xs ys [])))
+  (is (= '(-3 -3 -3) (zip-with '(1 2 3) '(4 5 6) -))))
+;fpins
+;fpins
+(with-test
+  (defn zip-with-fpins [xs ys f]
+    (if (or (nil? xs) (nil? ys))
+      nil
+      (let [[h1 & t1] xs [h2 & t2] ys]
+        (cons (f h1 h2) (zip-with-fpins t1 t2 f)))))
+  (is (= '(4 10 18) (zip-with-fpins '(1 2 3) '(4 5 6) *))))
