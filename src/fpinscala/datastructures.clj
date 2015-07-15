@@ -325,7 +325,6 @@
       (go xs ys [])))
   (is (= '(-3 -3 -3) (zip-with '(1 2 3) '(4 5 6) -))))
 ;fpins
-;fpins
 (with-test
   (defn zip-with-fpins [xs ys f]
     (if (or (nil? xs) (nil? ys))
@@ -333,3 +332,22 @@
       (let [[h1 & t1] xs [h2 & t2] ys]
         (cons (f h1 h2) (zip-with-fpins t1 t2 f)))))
   (is (= '(4 10 18) (zip-with-fpins '(1 2 3) '(4 5 6) *))))
+;-----------------------------------------------------------------------
+
+;3.24
+;mine
+(defn has-subsequence [sup sub]                             ;lesson learned - always use empty? to check collection
+  (letfn [(starts-with [ssub ssup]
+                     (loop [i2sub ssub i2sup ssup acc-sup '()]
+                       (if (or (empty? i2sub) (empty? i2sup))
+                         (= (reverse ssub) acc-sup)
+                         (let [[h1 & t1] i2sup]
+                           (recur (next i2sub) t1 (conj acc-sup h1))))))]
+    (loop [isup sup res '()]
+      (let [pass (starts-with sub isup)]
+        (if (empty? isup)
+          (not (every? false? res))
+          (recur (next isup) (conj res pass)))))))
+;fpins
+;TODO translate fpins solution
+;-----------------------------------------------------------------------
