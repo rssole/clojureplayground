@@ -1,5 +1,6 @@
 (ns fpinscala.datastructures
-  (:use clojure.test))
+  (:require [clojure.test :refer [with-test is]]
+            [clojure.core.match :refer [match]]))
 
 (defn append [xs ys]
   (if (nil? xs)
@@ -338,17 +339,17 @@
 ;mine
 (defn has-subsequence [sup sub]                             ;lesson learned - always use empty? to check collection
   (letfn [(starts-with [ssub ssup]
-                     (loop [i2sub ssub i2sup ssup acc-sup '()]
-                       (if (or (empty? i2sub) (empty? i2sup))
-                         (= (reverse ssub) acc-sup)
-                         (let [[h1 & t1] i2sup]
-                           (recur (next i2sub) t1 (conj acc-sup h1))))))]
+                       (loop [i2sub ssub i2sup ssup acc-sup '()]
+                         (if (or (empty? i2sub) (empty? i2sup))
+                           (= (reverse ssub) acc-sup)
+                           (let [[h1 & t1] i2sup]
+                             (recur (next i2sub) t1 (conj acc-sup h1))))))]
     (loop [isup sup res '()]
       (let [pass (starts-with sub isup)]
         (if (empty? isup)
           (not (every? false? res))
           (recur (next isup) (conj res pass)))))))
-;fpins
+;fpins - perhaps verbosity below would disappear if pattern match is used
 (defn starts-with [l prefix]
   (if (nil? prefix)
     true
@@ -365,4 +366,17 @@
         (if (and (not (nil? h)) (not (empty? t)))
           (recur t sub)
           false)))))
+;fpins - rewritten with clojure core.match
+(defn starts-with-revisited [l prefix]
+  (match [l prefix]
+    [_ ([] :seq :<< empty?)] true
+    [([h & t] :seq) ([h2 & t2] :seq)] (if (= h h2)
+                                        (starts-with-revisited t t2)
+                                        false)
+    :else false))
+(defn has-subsequence-revisited [sup sub]
+  (match [sup]
+    [([] :seq :<< empty?)] (empty? sub)
+    [_ :guard #(starts-with-revisited % sub)] true
+    [([_ & t] :seq)] (recur t sub)))
 ;-----------------------------------------------------------------------
