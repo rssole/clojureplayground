@@ -349,5 +349,20 @@
           (not (every? false? res))
           (recur (next isup) (conj res pass)))))))
 ;fpins
-;TODO translate fpins solution
+(defn starts-with [l prefix]
+  (if (nil? prefix)
+    true
+    (let [[h1 & t1] l [h2 & t2] prefix]
+      (if (= h1 h2)
+        (recur t1 t2)
+        false))))
+(defn has-subsequence-fpins [sup sub]
+  (if (empty? sup)
+    (empty? sub)
+    (if (starts-with sup sub)
+      true
+      (let [[h & t] sup]
+        (if (and (not (nil? h)) (not (empty? t)))
+          (recur t sub)
+          false)))))
 ;-----------------------------------------------------------------------
