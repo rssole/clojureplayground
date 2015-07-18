@@ -367,16 +367,28 @@
           (recur t sub)
           false)))))
 ;fpins - rewritten with clojure core.match
-(defn starts-with-revisited [l prefix]
-  (match [l prefix]
-    [_ ([] :seq :<< empty?)] true
-    [([h & t] :seq) ([h2 & t2] :seq)] (if (= h h2)
-                                        (starts-with-revisited t t2)
-                                        false)
-    :else false))
-(defn has-subsequence-revisited [sup sub]
-  (match [sup]
-    [([] :seq :<< empty?)] (empty? sub)
-    [_ :guard #(starts-with-revisited % sub)] true
-    [([_ & t] :seq)] (recur t sub)))
+
+(with-test
+  (defn starts-with-revisited [l prefix]
+    (match [l prefix]
+           [_ ([] :seq)] true ;[_ ([] :seq :<< empty?)] true was here before but this is more concise :)
+           [([h & t] :seq) ([h2 & t2] :seq)] (if (= h h2)
+                                               (starts-with-revisited t t2)
+                                               false)
+           :else false))
+  (is (true? (starts-with-revisited '(1 2 3 4) '(1 2 3))))
+  (is (true? (starts-with-revisited '(1 2 3 4) '(1 2 3))))
+  (is (false? (starts-with-revisited '(1 2 3 4) '(1 3))))
+  (is (false? (starts-with-revisited '(1 2 3 4) '(1 2 3 4 5)))))
+
+(with-test
+  (defn has-subsequence-revisited [sup sub]
+    (match [sup]
+           [([] :seq)] (empty? sub)                         ; same here as above
+           [_ :guard #(starts-with-revisited % sub)] true
+           [([_ & t] :seq)] (recur t sub)))
+  (is (true? (has-subsequence-revisited '(1 2 3 4) '(1 2 3))))
+  (is (true? (has-subsequence-revisited '(1 2 3 4) '(2 3 4))))
+  (is (false? (has-subsequence-revisited '(1 2 3 4) '(3 4 5))))
+  (is (false? (has-subsequence-revisited '(1 2 3 4) '(1 2 3 4 5)))))
 ;-----------------------------------------------------------------------
