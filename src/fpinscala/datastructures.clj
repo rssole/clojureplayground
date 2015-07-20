@@ -371,7 +371,7 @@
 (with-test
   (defn starts-with-revisited [l prefix]
     (match [l prefix]
-           [_ ([] :seq)] true ;[_ ([] :seq :<< empty?)] true was here before but this is more concise :)
+           [_ ([] :seq)] true                               ;[_ ([] :seq :<< empty?)] true was here before but this is more concise :)
            [([h & t] :seq) ([h2 & t2] :seq)] (if (= h h2)
                                                (starts-with-revisited t t2)
                                                false)
@@ -392,3 +392,33 @@
   (is (false? (has-subsequence-revisited '(1 2 3 4) '(3 4 5))))
   (is (false? (has-subsequence-revisited '(1 2 3 4) '(1 2 3 4 5)))))
 ;-----------------------------------------------------------------------
+
+;3.25
+;mine
+;First of all - clojure doesn't have Scala's traits so example can't
+;be matched 1-1 - functions and maps are used instead, so what I am doing here
+;is actually hybrid of JOC and FPINS (and JOC example is tweaked to more
+;match FPINS way
+(defn xconj [tree branch val]
+  (cond
+    (nil? tree) {:val val, :L nil, :R nil}
+    (nil? branch) tree
+    (= :L branch) {:val (:val tree)
+                   :L   (xconj (:L tree) branch val)
+                   :R   (:R tree)}
+    :else {:val (:val tree)
+           :L   (:L tree)
+           :R   (xconj (:R tree) branch val)}))
+
+(defn xseq [t]
+  (when t
+    (concat (xseq (:L t)) [(:val t)] (xseq (:R t)))))
+
+(defn t-size [t]
+  (letfn [(go [t acc]
+              (if (nil? t)
+                acc
+                (+ (go (:L t) (inc acc)) (go (:R t) (inc acc)))))]
+    (+ (go (:L t) 0) (go (:R t) 0))))
+
+
