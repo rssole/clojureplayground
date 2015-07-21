@@ -449,3 +449,12 @@
     (apply max (go t 1 #{}))))
 ;fpins
 ;-----------------------------------------------------------------------
+
+;3.28
+;mine
+(defn t-map [t f]
+  (letfn [(go [t branch new-t]
+              (if (nil? t)
+                new-t
+                (go (branch t) branch (xconj new-t branch (f (:val t))))))]
+    (go (:L t) :L (go (:R t) :R (xconj nil nil (f (:val t)))))))
