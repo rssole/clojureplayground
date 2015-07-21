@@ -398,7 +398,8 @@
 ;First of all - clojure doesn't have Scala's traits so example can't
 ;be matched 1-1 - functions and maps are used instead, so what I am doing here
 ;is actually hybrid of JOC and FPINS (and JOC example is tweaked to more
-;match FPINS way
+;match FPINS way (explicit branch selection as in FPINS, unlike "inferred"
+;branch depending on val
 (defn xconj [tree branch val]
   (cond
     (nil? tree) {:val val, :L nil, :R nil}
@@ -420,5 +421,31 @@
                 acc
                 (+ (go (:L t) (inc acc)) (go (:R t) (inc acc)))))]
     (+ (go (:L t) 0) (go (:R t) 0))))
+;fpins
+;-----------------------------------------------------------------------
 
+;3.26
+;mine
+(defn t-max [t]
+  (letfn [(go [t acc]
+              (if (nil? t)
+                acc
+                (let [val (:val t) new-max (if (nil? acc) val (max val acc))]
+                  (max (go (:R t) new-max) (go (:L t) new-max)))))]
+    (go t nil)))
+;fpins
 
+;-----------------------------------------------------------------------
+
+;3.27
+;mine
+(defn t-depth [t]
+  (letfn [(go [t depth depths]
+              (if (nil? t)
+                depths
+                (clojure.set/union
+                  (conj (go (:L t) (inc depth) depths) depth)
+                  (conj (go (:R t) (inc depth) depths) depth))))]
+    (apply max (go t 1 #{}))))
+;fpins
+;-----------------------------------------------------------------------
