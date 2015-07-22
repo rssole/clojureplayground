@@ -419,9 +419,20 @@
   (letfn [(go [t acc]
               (if (nil? t)
                 acc
+                ;my solution is wrong here :| I am passing same acc to both
+                ;left and right path walk
                 (+ (go (:L t) (inc acc)) (go (:R t) (inc acc)))))]
     (+ (go (:L t) 0) (go (:R t) 0))))
-;fpins
+;fpins - no pattern matching
+(defn t-size-fpins [t]
+  (if (and (nil? (:R t)) (nil? (:L t)))
+    1
+    (+ 1 (t-size-fpins (:R t)) (t-size-fpins (:L t)))))
+;fpins - with pattern matching
+(defn t-size-fpins-revisited [t]
+  (match [t]
+         [(:or {:val _ :R nil :L nil} nil)] 1
+         [{:val _ :R r :L l}] (+ 1 (t-size-fpins-revisited r) (t-size-fpins-revisited l))))
 ;-----------------------------------------------------------------------
 
 ;3.26
@@ -433,8 +444,18 @@
                 (let [val (:val t) new-max (if (nil? acc) val (max val acc))]
                   (max (go (:R t) new-max) (go (:L t) new-max)))))]
     (go t nil)))
-;fpins
-
+;fpins - what is cumbersome here is probably necessity of covering all cases when matching
+;over map but that is limitation of Clojure (or perhaps my own as I am not familiar currently
+;with better options) as Scala variant of FPINS is utilizing matching over two case classes which
+;are extending same Trait. Nevertheless, here it is, how I translated it
+;not though that order of patterns here matters very much as e.g. pattern {:val :L l :R r} captures
+;when l and r are nils as well so explicit match of nil must come before
+(defn t-max-fpins [t]
+  (match t
+         {:val v :L nil :R nil} v
+         {:val v :L nil :R r} (max v (t-max-fpins r))
+         {:val v :L l :R nil} (max v (t-max-fpins l))
+         {:val v :L l :R r}  (max v (t-max-fpins l) (t-max-fpins r))))
 ;-----------------------------------------------------------------------
 
 ;3.27
@@ -458,3 +479,4 @@
                 new-t
                 (go (branch t) branch (xconj new-t branch (f (:val t))))))]
     (go (:L t) :L (go (:R t) :R (xconj nil nil (f (:val t)))))))
+
