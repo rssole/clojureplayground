@@ -469,6 +469,12 @@
                   (conj (go (:R t) (inc depth) depths) depth))))]
     (apply max (go t 1 #{}))))
 ;fpins
+(defn t-depth-fpins [t]
+  (match t
+         {:val v :L nil :R nil} 1
+         {:val v :L nil :R r} (+ 1 (t-depth-fpins r))
+         {:val v :L l :R nil} (+ 1 (t-depth-fpins l))
+         {:val v :L l :R r}  (+ 1 (max (t-depth-fpins l) (t-depth-fpins r)))))
 ;-----------------------------------------------------------------------
 
 ;3.28
