@@ -489,11 +489,24 @@
 ;given my structure of tree (via maps) and my xconj function, those don't
 ;allow 1-1 translation - so, I've hit a ceiling/limitation :)
 ;so I'l need different structure...
+;these two ressemble Leaf and Branch (in my case: Node) from FPINS
+(defn leaf [val]
+  {:val val})
+(defn node [l-tree r-tree]
+  {:L l-tree :R r-tree})
 
 (defn t-map-fpins [t f]
   (match t
-         {:val v :L nil :R nil} (xconj nil nil (f v))
-         {:val v :L nil :R r} (t-map-fpins r f)
-         {:val v :L l :R nil} (t-map-fpins l f)
-         {:val v :L l :R r} ()))
+         {:val v} (leaf (f v))
+         {:L l :R r} (node (t-map-fpins l f) (t-map-fpins r f))))
 ;-----------------------------------------------------------------------
+
+;3.29
+;first I try with my original "xconj" structure
+(defn fold
+  "Folds tree. t is tree, f is function of transformation and g is accumulator function"
+  [t f g]
+  (letfn [(go [t acc]
+              (if (nil? t)
+                acc
+                ))]))
