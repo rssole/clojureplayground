@@ -485,4 +485,15 @@
                 new-t
                 (go (branch t) branch (xconj new-t branch (f (:val t))))))]
     (go (:L t) :L (go (:R t) :R (xconj nil nil (f (:val t)))))))
+;fpins
+;given my structure of tree (via maps) and my xconj function, those don't
+;allow 1-1 translation - so, I've hit a ceiling/limitation :)
+;so I'l need different structure...
 
+(defn t-map-fpins [t f]
+  (match t
+         {:val v :L nil :R nil} (xconj nil nil (f v))
+         {:val v :L nil :R r} (t-map-fpins r f)
+         {:val v :L l :R nil} (t-map-fpins l f)
+         {:val v :L l :R r} ()))
+;-----------------------------------------------------------------------
