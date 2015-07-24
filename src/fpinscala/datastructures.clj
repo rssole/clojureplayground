@@ -503,10 +503,28 @@
 
 ;3.29
 ;first I try with my original "xconj" structure
-(defn fold
+;I am not really sure how to sneak out without having acc as my structure
+;does not goes via ADTs to acommodate termination?
+(defn t-fold
   "Folds tree. t is tree, f is function of transformation and g is accumulator function"
-  [t f g]
+  [t f g init]
   (letfn [(go [t acc]
               (if (nil? t)
                 acc
-                ))]))
+                (if (and (nil? (:L t)) (nil? (:R t)))
+                  (f (:val t))
+                  (g (go (:R t) acc) (go (:L t) acc)))))]
+    (g (go (:R t) init) (go (:L t) init))))
+
+(defn t-size-via-t-fold [t]
+  (t-fold t (fn [_] 1) #(+ 1 % %2) 1))
+
+(defn t-max-via-t-fold [t]
+  (t-fold t #(identity %) #(max % %2) (:val t)))
+
+(defn t-depth-via-t-fold [t]
+  (t-fold t (fn [_] 0) #(+ 1 (max % %2)) 1))
+
+;My xconj original structure does not allow proper implementation of map via fold
+;as it does not allow explicit association of "branch"
+;This one will be marked as partially solved :/
