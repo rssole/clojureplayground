@@ -62,8 +62,13 @@
        (= x (reduce + fcrs))))) 8128)
 
 ;Problem 60 - Sequence reductions
-(defn seq-reds
+(defn my-reds
   ([f xs]
-   (loop [in-xs xs z (f) reds-acc []]
-     (when in-xs (lazy-seq ))))
-  ([f z xs]))
+   (lazy-seq
+     (my-reds f (first xs) (rest xs))))
+  ([f i xs]
+   (cons i
+     (lazy-seq
+       (when (seq xs)
+         (my-reds f (f i (first xs)) (rest xs)))))))
+
