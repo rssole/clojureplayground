@@ -33,11 +33,13 @@
 (defmulti event-handler (fn [_ e]
                           (keyword (str 'clojureplayground.swing-probing) (.. e (getSource) (getClass) (getSimpleName)))))
 
-(derive ::JLabel ::JButton)
+;(derive ::JLabel ::JButton)
 
 (defmethod event-handler ::JButton [this _]
   (println (str this "btn")))
 (defmethod event-handler ::JRadioButton [this _]
   (println (str this "rbtn")))
-;(defmethod event-handler :JLabel [this _]
-;  (println (str this "label")))
+(defmethod event-handler :default [this _]
+  (println (str this)))
+(defmethod event-handler ::JLabel [this _]
+  (println (str this "label")))
