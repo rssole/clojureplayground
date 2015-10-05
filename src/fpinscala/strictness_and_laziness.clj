@@ -50,6 +50,17 @@
 ;my-drop is not lazy though...it operates properly with "my-take" but
 ;evaluates to the bottom otherwise... that could be improved.
 ;fpins
-;both solutions within fpins
-;uses pattern matching but conceptually are similar
+;take - conceptually similar
+;drop - better than mine, preserves lazyness
+(defn my-drop-fpins [x s]
+  (if (seq s)
+    (if (> x 0)
+      (recur (dec x) (rest s))
+      s)
+    s))
+;-----------------------------------------------------------------------
+
+;5.3
+;mine
+;fpins
 ;-----------------------------------------------------------------------
