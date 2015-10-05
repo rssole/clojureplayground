@@ -62,5 +62,20 @@
 
 ;5.3
 ;mine
+(defn my-take-while [f s]
+  (letfn [(go [s acc]
+              (if (seq s)
+                (let [value (first s)]
+                  (if (f value)
+                    (recur (rest s) (conj acc value))
+                    acc))
+                acc))]
+    (go s [])))
 ;fpins
+(defn my-take-while-fpins
+  "fpins variant of take-while"                                   ;obviously - less verbose than mine and no (obvious) accumulation :)
+  [f s]
+  (let [value (first s)]
+    (when (f value)
+      (stream-cons value (my-take-while-fpins f (rest s))))))
 ;-----------------------------------------------------------------------
