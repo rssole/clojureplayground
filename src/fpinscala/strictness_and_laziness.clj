@@ -79,3 +79,15 @@
     (when (f value)
       (stream-cons value (my-take-while-fpins f (rest s))))))
 ;-----------------------------------------------------------------------
+
+;auxiliary - direct translation from book
+(defn fold-right [z f s]
+  (if-let [[h & t] s]
+    (f h (fold-right z f t))
+    z))
+
+;example - exists via f-r - also direct translation from book
+(defn exists
+  "Function exists via fold-right from fpins"
+  [p s]
+  (fold-right false #(or (p %) %2) s))
