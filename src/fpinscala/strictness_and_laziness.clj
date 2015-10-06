@@ -73,7 +73,7 @@
     (go s [])))
 ;fpins
 (defn my-take-while-fpins
-  "fpins variant of take-while"                                   ;obviously - less verbose than mine and no (obvious) accumulation :)
+  "fpins variant of take-while"                             ;obviously - less verbose than mine and no (obvious) accumulation :)
   [f s]
   (let [value (first s)]
     (when (f value)
@@ -82,9 +82,11 @@
 
 ;auxiliary - direct translation from book
 (defn fold-right [z f s]
-  (if-let [[h & t] s]
-    (f h (fold-right z f t))
-    z))
+  (let [[h & t] s]
+    (if t
+      (f h (fold-right z f t))
+      (if h (f h z) z))))
+;it would be more concise should I have used core.match
 
 ;example - exists via f-r - also direct translation from book
 (defn exists
@@ -106,4 +108,14 @@
   "forAll as in fpins, I should have observed that f-r should be used! But mine works as well and it is lazy also"
   [p s]
   (fold-right true #(and (p %) %2) s))
+;-----------------------------------------------------------------------
+
+;5.5
+;mine
+(defn take-while-fr
+  "Reimplementing take-while via f-r"
+  [p s]
+  (fold-right '() #(if (p %) (conj %2 %) %2) s))
+;fpins
+;conceptually the same
 ;-----------------------------------------------------------------------
