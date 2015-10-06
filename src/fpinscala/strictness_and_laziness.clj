@@ -83,9 +83,9 @@
 ;auxiliary - direct translation from book
 (defn fold-right [z f s]
   (let [[h & t] s]
-    (if t
+    (if h
       (f h (fold-right z f t))
-      (if h (f h z) z))))
+      z)))
 ;it would be more concise should I have used core.match
 
 ;example - exists via f-r - also direct translation from book
@@ -118,4 +118,14 @@
   (fold-right '() #(if (p %) (conj %2 %) %2) s))
 ;fpins
 ;conceptually the same
+;-----------------------------------------------------------------------
+
+;5.6
+;mine
+(defn head-option-fr
+  "headOption from fpins via f-r"
+  [s]
+  (fold-right {:val nil :none true} (fn [v _] (if v {:val v :none false})) s))
+;fpins
+;conceptually the same - woo-hoo :)
 ;-----------------------------------------------------------------------
