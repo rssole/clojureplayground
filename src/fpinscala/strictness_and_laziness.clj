@@ -80,7 +80,7 @@
       (stream-cons value (my-take-while-fpins f (rest s))))))
 ;-----------------------------------------------------------------------
 
-;auxiliary - direct translation from book
+;auxiliary - direct translation from book - WARNING! IT IS NOT REALLY LAZY as I am currently not sure how to mimic named/lazy params
 (defn fold-right [z f s]
   (let [[h & t] s]
     (if h
@@ -128,4 +128,27 @@
   (fold-right {:val nil :none true} (fn [v _] (if v {:val v :none false})) s))
 ;fpins
 ;conceptually the same - woo-hoo :)
+;-----------------------------------------------------------------------
+
+;5.7
+;mine
+(defn map-fr
+  "map via f-r"
+  [f s]
+  (fold-right '() #(conj %2 (f %)) s))
+(defn filter-fr
+  "filter via f-r"
+  [p s]
+  (fold-right '() #(if (p %) (conj %2 %) %2) s))
+(defn append-fr
+  "append via f-r"
+  [sl sr]
+  (fold-right sr #(conj %2 %) sl))
+(defn flat-map-fr
+  "flatMap via f-r"
+  [f s]
+  (fold-right '() #(append-fr (f %) %2) s))
+;fpins
+;all conceptually the same with exception that I simply translated flat-map by accident :)
+;furthermore I have had incorrect order due to argument swapping
 ;-----------------------------------------------------------------------
