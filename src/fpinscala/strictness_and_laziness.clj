@@ -92,12 +92,12 @@
 (defn exists
   "Function exists via fold-right from fpins"
   [p s]
-  (fold-right false #(or (p %) %2) s))
+  (fold-right false #(or %2 (p %)) s))
 
 ;5.4
 ;mine
 (defn for-all
-  "forAll for 5.4 in FPINS, it is lazy but much more verbose than fpins solution and I shoul have noticed f-r should be used!"
+  "forAll for 5.4 in FPINS, it is lazy but much more verbose than fpins solution and I should have noticed f-r should be used!"
   [p s]
   (let [[h & t] s]
     (if t
@@ -107,7 +107,7 @@
 (defn for-all-fpins
   "forAll as in fpins, I should have observed that f-r should be used! But mine works as well and it is lazy also"
   [p s]
-  (fold-right true #(and (p %) %2) s))
+  (fold-right true #(and %2 (p %)) s))
 ;-----------------------------------------------------------------------
 
 ;5.5
