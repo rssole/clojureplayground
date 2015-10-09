@@ -183,7 +183,7 @@
   "Fibonacci sequence"
   []
   (letfn [(go [x0, x1]
-            (cons x0 (lazy-seq (go x1, (+ x0 x1)))))]
+              (cons x0 (lazy-seq (go x1, (+ x0 x1)))))]
     (stream-cons 0 (go 1 1))))
 ;fpins
 (defn fibs-fpins                                            ; well :) I should have seen it... there is unnecessary stream-cons :)
@@ -194,3 +194,20 @@
     (go 0 1)))
 ;-----------------------------------------------------------------------
 
+;5.11
+;mine
+(defn unfold
+  "Unfold for exercise 5.11"
+  [z f]                                                     ;f produces both next value and next state
+  (let [val (f z)]
+    (when val
+      (cons val (lazy-seq (unfold val f))))))
+;fpins
+;-----------------------------------------------------------------------
+
+;5.12
+(defn fibs-via-unfold
+  "Fibonacci sequence via unfold"
+  []
+  (cons 0 (map first (unfold [0 1] #(let [x0 (first %) x1 (second %)]
+                                     [x1 (+ x0 x1)])))))
