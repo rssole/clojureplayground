@@ -177,3 +177,20 @@
 ;fpins
 ;conceptually - the same
 
+;5.10
+;mine
+(defn fibs
+  "Fibonacci sequence"
+  []
+  (letfn [(go [x0, x1]
+            (cons x0 (lazy-seq (go x1, (+ x0 x1)))))]
+    (stream-cons 0 (go 1 1))))
+;fpins
+(defn fibs-fpins                                            ; well :) I should have seen it... there is unnecessary stream-cons :)
+  "Fibonacci sequence"
+  []
+  (letfn [(go [x0, x1]
+              (cons x0 (lazy-seq (go x1, (+ x0 x1)))))]
+    (go 0 1)))
+;-----------------------------------------------------------------------
+
