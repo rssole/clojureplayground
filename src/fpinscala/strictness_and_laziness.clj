@@ -152,3 +152,28 @@
 ;all conceptually the same with exception that I simply translated flat-map by accident :)
 ;furthermore I have had incorrect order due to argument swapping
 ;-----------------------------------------------------------------------
+
+;5.8
+;mine
+(defn constant
+  "Returns inifinite stream of given value"
+  [x]
+  (stream-cons x (lazy-seq (constant x))))
+;fpins
+;I am not really sure if this is good variant and if it
+;really reassembles fpins solution, anyway it is done through Clojure's core functions.
+;And I am not really sure how to reassemble fpins as Clojure doesn't provide lazy vals/args
+(defn constant-fpins
+  [x]
+  (repeat x))
+;-----------------------------------------------------------------------
+
+;5.9
+;mine
+(defn from
+  "Returns range of integers starting from n"
+  [n]
+  (stream-cons n (lazy-seq (from (inc n)))))
+;fpins
+;conceptually - the same
+
