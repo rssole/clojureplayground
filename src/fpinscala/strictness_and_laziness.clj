@@ -199,15 +199,28 @@
 (defn unfold
   "Unfold for exercise 5.11"
   [z f]                                                     ;f produces both next value and next state
-  (let [val (f z)]
-    (when val
-      (cons val (lazy-seq (unfold val f))))))
+  (when-let [val (f z)]
+    (cons val (lazy-seq (unfold val f)))))
 ;fpins
+(defn unfold-fpins
+  "Unfold for exercise 5.11"
+  [z f]                                                     ;f produces both next value and next state
+  (when-let [[h s] (f z)]
+    (cons h (lazy-seq (unfold-fpins s f)))))                      ;here is difference between mine and fpins :)
+;obviously I haven't fully comprehend point of unfold
+;and to use elements of "tuple" (vector in Clojure's case) appropriately
 ;-----------------------------------------------------------------------
 
 ;5.12
+;mine
 (defn fibs-via-unfold
   "Fibonacci sequence via unfold"
   []
   (cons 0 (map first (unfold [0 1] #(let [x0 (first %) x1 (second %)]
                                      [x1 (+ x0 x1)])))))
+;fpins
+(defn fibs-via-unfold-fpins
+  "Fibonacci sequence via unfold by fpins"
+  []
+  (unfold-fpins [0 1] #(when-let [[f0 f1] %]
+                        [f0 [f1 (+ f0 f1)]])))
