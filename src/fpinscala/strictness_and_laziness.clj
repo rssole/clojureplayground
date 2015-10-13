@@ -211,7 +211,7 @@
 ;and to use elements of "tuple" (vector in Clojure's case) appropriately
 ;-----------------------------------------------------------------------
 
-;5.12
+;5.12 - fibs
 ;mine
 (defn fibs-via-unfold
   "Fibonacci sequence via unfold"
@@ -224,3 +224,39 @@
   []
   (unfold-fpins [0 1] #(when-let [[f0 f1] %]
                         [f0 [f1 (+ f0 f1)]])))
+;-----------------------------------------------------------------------
+
+;5.12 - from
+;mine - I will use unfold-fpins as it is obviously better implementation
+(defn from-via-unfold
+  "From sequence via unfold"
+  [x]
+  (unfold-fpins x #(do [% (inc %)])))
+;fpins
+;well, conceptually the same, although I was wandering somewhat
+;with starting with vector [x (inc x)] what worked but with this
+;implementation destructuring (or "pattern matching" if you like) is not necessary
+
+;5.12 - constant
+;mine
+(defn constant-via-unfold
+  "Constant via unfold"
+  [x]
+  (unfold-fpins x #(do [% %])))
+;fpins
+;conceptually - the same
+
+;5.12 - ones
+;mine
+(defn ones-via-unfold
+  "Ones via unfold"
+  []
+  (unfold-fpins 1 #(do [% %])))
+;fpins
+;conceptually - the same
+;mine via mine unfold :) - THIS IS EXAMPLE HOW NOT TO DO IT :)
+(defn ones-via-mine-unfold
+  "Ones via my wrong implementation of unfold"
+  []
+  (map first (unfold [1 1] #(when-let [[x0 x1] %]
+                             [x0 x1]))))
