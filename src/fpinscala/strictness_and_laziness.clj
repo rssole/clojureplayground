@@ -304,3 +304,34 @@
 ;fpins
 ;conceptually - the same :)
 
+;5.13 - zip-all
+;mine
+(defn zip-all
+  "Zip all for exercise 5.13 of fpins implemented via unfold"
+  [s1 s2]
+  (unfold-fpins [s1 s2] #(let [[[h1 & t1] [h2 & t2]] %]
+                          (cond
+                            (and h1 h2) [[h1 h2] [t1 t2]]
+                            (and h1 (not h2)) [[h1 nil] [t1 nil]]
+                            (and (not h1) h2) [[nil h2] [nil t2]]))))
+;fpins
+;more or less conceptually the same, although in fpins solutions
+;an extra function zipWithAlll has been introduced and that function
+;accepts extra function like so it is more general - like this...
+(defn zip-with-all-fpins
+  "Mimics zipWithAll from fpins"
+  [f s1 s2]
+  (unfold-fpins [s1 s2] #(let [[[h1 & t1] [h2 & t2]] %]
+                          (cond
+                            (and h1 h2) [(f h1 h2) [t1 t2]]
+                            (and h1 (not h2)) [(f h1 nil) [t1 nil]]
+                            (and (not h1) h2) [(f nil h2) [nil t2]]))))
+;although it looks verbose it is simpler than fpins Scala variant as
+;fpins Scala variant relies on Option and pattern matching which in
+;bottom line resulted in much more verbosity - feel free to check it on your own anyway...
+;...and then, zip-all
+(defn zip-all-fpins
+  "Zip all for exercise 5.13 - fpins translation"
+  [s1 s2]
+  (zip-with-all-fpins #(vector %1 %2) s1 s2))
+
