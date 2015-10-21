@@ -282,7 +282,7 @@
 ;conceptually - the same, just counting backwards and pattern matching on 1
 ;which I am awoiding as I am sticking to raw clojure without involving core.match
 
-;5.13 - takeWhile
+;5.13 - take-while
 ;mine
 (defn take-while-via-unfold
   "Take-while via unfold for exercise 5.13 of fpins"
@@ -292,3 +292,15 @@
                       [h t]))))
 ;fpins
 ;conceptually - the same
+
+;5.13 - zip-with
+;mine
+(defn zip-with-via-unfold
+  "Zip with for exercise 5.13 of fpins"
+  [f s1 s2]
+  (unfold-fpins [s1 s2] #(let [[[h1 & t1] [h2 & t2]] %]
+                          (when (and h1 h2)
+                            [(f h1 h2) [t1 t2]]))))
+;fpins
+;conceptually - the same :)
+
