@@ -260,3 +260,35 @@
   []
   (map first (unfold [1 1] #(when-let [[x0 x1] %]
                              [x0 x1]))))
+
+;5.13 - map
+;mine
+(defn map-via-unfold [f s]
+  (unfold-fpins s #(let [[h & t] %]
+                    (when h
+                      [(f h) t]))))
+;fpins - more or less the same
+;as fpins variant is using pattern match with function which (raw) Clojure lacks
+
+;5.13 - take
+;mine
+(defn take-via-unfold
+  "Take via unfold for exercise 5.13 of fpins"
+  [n s]
+  (unfold-fpins [s 1] #(let [[[h & t] cnt] %]
+                        (when (and h (<= cnt n))
+                          [h [t (inc cnt)]]))))
+;fpins
+;conceptually - the same, just counting backwards and pattern matching on 1
+;which I am awoiding as I am sticking to raw clojure without involving core.match
+
+;5.13 - takeWhile
+;mine
+(defn take-while-via-unfold
+  "Take-while via unfold for exercise 5.13 of fpins"
+  [f s]
+  (unfold-fpins s #(let [[h & t] %]
+                    (when (and h (f h))
+                      [h t]))))
+;fpins
+;conceptually - the same
