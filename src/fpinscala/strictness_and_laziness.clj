@@ -335,3 +335,11 @@
   [s1 s2]
   (zip-with-all-fpins #(vector %1 %2) s1 s2))
 
+;5.14
+;mine
+;first - hasSubsequence mentioned in book before exercise
+(defn has-subseq
+  "hasSubsequence mentioned in book before exercise 5.14"
+  [s sub]
+  )
+
