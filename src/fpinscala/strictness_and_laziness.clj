@@ -395,10 +395,11 @@
 (defn scan-right-fpins
   "scanRight from FPINS - FPINS solution translation :)"
   [z f s]
-  (second (fold-right [z (stream-cons z '())]
-              #(let [[x1 x2] %2 b (f % x1)]
-                [b (cons b x2)])
-              s)))
+  (second
+    (fold-right [z (stream-cons z '())]
+                #(let [[x1 x2] %2 b (f % x1)]
+                  [b (cons b x2)])
+                s)))
 ;note though that given Clojure does not support lazy arg evaluation
 ;and I don't know how to mimic them, translation is not necessary lazy
 ;as fpins is
