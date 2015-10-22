@@ -379,3 +379,28 @@
   "Translation of hasSubsequence after exercise 5.15"
   [s sub]
   (exists #(do (println %) (starts-with-fpins % sub)) (tails s)))
+
+;5.16
+;mine
+(defn scan-right
+  "scanRight from FPINS"
+  [z f s]
+  (fold-right (list z)
+              #(cons (fold-right z f %) %2)
+              (tails s)))
+;well I was on good track and knew that unfold won't work
+;as it generates left -> right :)
+;however, my solution although works, it is not "single-pass" so, it is not efficient
+;fpins
+(defn scan-right-fpins
+  "scanRight from FPINS - FPINS solution translation :)"
+  [z f s]
+  (second (fold-right [z (stream-cons z '())]
+              #(let [[x1 x2] %2 b (f % x1)]
+                [b (cons b x2)])
+              s)))
+;note though that given Clojure does not support lazy arg evaluation
+;and I don't know how to mimic them, translation is not necessary lazy
+;as fpins is
+
+;By this, Chapter 5 is completed :)
