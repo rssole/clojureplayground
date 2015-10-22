@@ -52,7 +52,7 @@
 ;fpins
 ;take - conceptually similar
 ;drop - better than mine, preserves lazyness
-(defn my-drop-fpins [x s]
+(defn drop-fpins [x s]
   (if (seq s)
     (if (> x 0)
       (recur (dec x) (rest s))
@@ -356,3 +356,26 @@
 ;FPINS variant is also more correct(?, mathematically?)
 ;given subsequence is empty it returns true, while mine not
 
+;5.15
+(defn tails
+  "Tails function"
+  [s]
+  (unfold-fpins s #(let [[h & t] %]
+                    (when h
+                      [% t]))))
+;my solution does not contain "empty stream" at the end as required in FPINS
+(defn tails-fpins
+  "Tails function - fpins translation"
+  [s]
+  (unfold-fpins s #(if (empty? %)
+                    nil
+                    [% (drop-fpins 1 %)])))
+;well given that Clojure does not have "option" and treats nil as falsey then
+;neither fpins translation yielded "empty" stream at the end
+;nevertheless this works properly - Clojure way :)
+
+;has-subsequence
+(defn has-subsequence
+  "Translation of hasSubsequence after exercise 5.15"
+  [s sub]
+  (exists #(do (println %) (starts-with-fpins % sub)) (tails s)))
