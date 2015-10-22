@@ -206,7 +206,7 @@
   "Unfold for exercise 5.11"
   [z f]                                                     ;f produces both next value and next state
   (when-let [[h s] (f z)]
-    (cons h (lazy-seq (unfold-fpins s f)))))                      ;here is difference between mine and fpins :)
+    (cons h (lazy-seq (unfold-fpins s f)))))                ;here is difference between mine and fpins :)
 ;obviously I haven't fully comprehend point of unfold
 ;and to use elements of "tuple" (vector in Clojure's case) appropriately
 ;-----------------------------------------------------------------------
@@ -337,9 +337,22 @@
 
 ;5.14
 ;mine
-;first - hasSubsequence mentioned in book before exercise
-(defn has-subseq
-  "hasSubsequence mentioned in book before exercise 5.14"
+(defn starts-with
+  "Checking if stream/sequence starts with another one given (Exercise 5.14)"
   [s sub]
-  )
+  (for-all
+    #(let [[x _] %]
+      (not (nil? x)))
+    (zip-all (take-while #(let [[x0 x1] %]
+                           (and x0 x1 (= x0 x1))) (zip-all s sub)) sub)))
+;this works - however, zip-all twice with sub is very inefficient
+;fpins
+(defn starts-with-fpins
+  "FPINS variant of above function"
+  [s sub]
+  (for-all-fpins #(let [[x0 x1] %] (= x0 x1)) (take-while #(let [[_ y] %]
+                                                            (not (nil? y))) (zip-all s sub))))
+;I was on good path though... and that's all :)
+;FPINS variant is also more correct(?, mathematically?)
+;given subsequence is empty it returns true, while mine not
 
