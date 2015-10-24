@@ -29,7 +29,15 @@
 (defn non-negative-int
   "Generates random integer between 0 and Int.maxValue (inclusive)"
   [rng]
-  (let [{next-int :n nxt-rng :nxt-rng} (rng)]
-    (if (> next-int Integer/MIN_VALUE)
-      (make-result (Math/abs ^int next-int) nxt-rng)
+  (let [{:keys [n nxt-rng]} (rng)]
+    (if (> n Integer/MIN_VALUE)
+      (make-result (Math/abs ^int n) nxt-rng)
       (make-result Integer/MAX_VALUE nxt-rng))))
+;fpins
+(defn non-negative-int-fpins
+  "FPINS variant of above function - haha - and I was thinking: Adding one is way too simple :)"
+  [rng]
+  (let [{:keys [n nxt-rng]} (rng)]
+    (if (< n 0)
+      (make-result (- (inc n)) nxt-rng)
+      (make-result n nxt-rng))))
