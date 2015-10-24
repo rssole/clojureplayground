@@ -8,6 +8,11 @@
   (fn []
     (simple-rng seed)))
 
+(defn- make-result
+  "Auxiliary function to avoid same map creation all over the place"
+  [n nxt-rng]
+  {:n n :nxt-rng nxt-rng})
+
 (defn- simple-rng
   "As per listing 6.2 from FPINS"
   [^long seed]
@@ -17,7 +22,14 @@
         ;to make this working same way as in Scala/FPINS option
         nxt-rng (make-simple-rng nseed)
         n (.intValue (unsigned-bit-shift-right nseed 16))]
-    {:n n :nxt-rng nxt-rng}))
-
+    (make-result n nxt-rng)))
 
 ;6.1
+;mine
+(defn non-negative-int
+  "Generates random integer between 0 and Int.maxValue (inclusive)"
+  [rng]
+  (let [{next-int :n nxt-rng :nxt-rng} (rng)]
+    (if (> next-int Integer/MIN_VALUE)
+      (make-result (Math/abs ^int next-int) nxt-rng)
+      (make-result Integer/MAX_VALUE nxt-rng))))
