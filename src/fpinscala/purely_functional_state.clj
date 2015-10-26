@@ -24,12 +24,16 @@
         n (.intValue (unsigned-bit-shift-right nseed 16))]
     (make-result n nxt-rng)))
 
+(defmacro with-rng [rng bindings & body]
+  `(let [{:keys ~bindings} ~rng]
+     ~@body))
+
 ;6.1
 ;mine
 (defn non-negative-int
   "Generates random integer between 0 and Int.maxValue (inclusive)"
   [rng]
-  (let [{:keys [n nxt-rng]} (rng)]
+  (with-rng (rng) [n nxt-rng]
     (if (> n Integer/MIN_VALUE)
       (make-result (Math/abs ^int n) nxt-rng)
       (make-result Integer/MAX_VALUE nxt-rng))))
@@ -37,7 +41,16 @@
 (defn non-negative-int-fpins
   "FPINS variant of above function - haha - and I was thinking: Adding one is way too simple :)"
   [rng]
-  (let [{:keys [n nxt-rng]} (rng)]
+  (with-rng (rng) [n nxt-rng]
     (if (< n 0)
       (make-result (- (inc n)) nxt-rng)
       (make-result n nxt-rng))))
+
+;6.2
+;mine
+(defn a-double
+  "Generates Double between 0 (inclusive) and 1 (exclusive)"
+  [rng]
+  (with-rng (non-negative-int rng) [n nxt-rng]
+            (let [dbl (/ n Integer/MAX_VALUE)]
+              (make-result (double dbl) nxt-rng))))
