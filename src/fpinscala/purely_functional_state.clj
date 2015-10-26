@@ -41,3 +41,10 @@
     (if (< n 0)
       (make-result (- (inc n)) nxt-rng)
       (make-result n nxt-rng))))
+
+;6.2
+;mine
+(defn random-double
+  "Generates random double [0, 1)"
+  [rng]
+  (let [n (non-negative-int rng)]))
