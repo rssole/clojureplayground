@@ -176,6 +176,7 @@
   (stream-cons n (lazy-seq (from (inc n)))))
 ;fpins
 ;conceptually - the same
+;-----------------------------------------------------------------------
 
 ;5.10
 ;mine
@@ -269,6 +270,7 @@
                       [(f h) t]))))
 ;fpins - more or less the same
 ;as fpins variant is using pattern match with function which (raw) Clojure lacks
+;-----------------------------------------------------------------------
 
 ;5.13 - take
 ;mine
@@ -334,6 +336,7 @@
   "Zip all for exercise 5.13 - fpins translation"
   [s1 s2]
   (zip-with-all-fpins #(vector %1 %2) s1 s2))
+;-----------------------------------------------------------------------
 
 ;5.14
 ;mine
@@ -355,6 +358,7 @@
 ;I was on good path though... and that's all :)
 ;FPINS variant is also more correct(?, mathematically?)
 ;given subsequence is empty it returns true, while mine not
+;-----------------------------------------------------------------------
 
 ;5.15
 (defn tails
@@ -379,6 +383,7 @@
   "Translation of hasSubsequence after exercise 5.15"
   [s sub]
   (exists #(do (println %) (starts-with-fpins % sub)) (tails s)))
+;-----------------------------------------------------------------------
 
 ;5.16
 ;mine
