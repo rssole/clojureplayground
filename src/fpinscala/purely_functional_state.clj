@@ -1,4 +1,5 @@
-(ns fpinscala.purely-functional-state)
+(ns fpinscala.purely-functional-state
+  (:use [fpinscala.strictness-and-laziness :only [unfold-fpins take-via-unfold]]))
 
 (declare simple-rng)
 
@@ -90,3 +91,37 @@
 ;fpins
 ;well conceptually all the same stuff with difference I've introduced
 ;macro (for fun and exercise :) )
+;-----------------------------------------------------------------------
+
+;6.4
+;mine
+(defn random-ints
+  "Generates list of random integers"
+  [n rng]
+  (take-via-unfold n (unfold-fpins
+                       (rng)
+                       (fn [nstate]
+                         (from-rng nstate :let [n nxt-rng]
+                                   [n (nxt-rng)])))))
+;fpins
+;I've used unfold, whereas fpins is using plain recursion
+;and my solution does not return last rng so my solution is only partial :|
+(defn random-ints-fpins-1
+  "Generates list of random integers - fpins variant 1"
+  [n rng]
+  (if (zero? n)
+    ['() rng]
+    (from-rng (rng) :let [x r1]
+              (let [[xs, r2] (random-ints-fpins-1 (dec n) r1)]
+                [(cons x xs) r2]))))
+
+(defn random-ints-fpins-2
+  "Generates list of random integers - fpins variant 2 - TAIL RECURSIVE - outcome is reversed though but apparently it does not matter"
+  [n rng]
+  (letfn [(go [cnt r xs]
+              (if (zero? cnt)
+                [xs r]
+                (from-rng (r) :let [x r2]
+                          (go (dec cnt) r2 (cons x xs)))))]
+    (go n rng '())))
+;-----------------------------------------------------------------------
