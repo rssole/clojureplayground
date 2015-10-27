@@ -25,7 +25,7 @@
     (make-result n nxt-rng)))
 
 (defmacro from-rng [rng _ bindings & body]
-  `(let [{:keys ~bindings} ~rng]
+  `(let [{~@(interleave bindings [:n :nxt-rng]) ~@[]} ~rng]
      ~@body))
 
 ;6.1
@@ -33,18 +33,18 @@
 (defn non-negative-int
   "Generates random integer between 0 and Int.maxValue (inclusive)"
   [rng]
-  (from-rng (rng) :use [n nxt-rng]
-    (if (> n Integer/MIN_VALUE)
-      (make-result (Math/abs ^int n) nxt-rng)
-      (make-result Integer/MAX_VALUE nxt-rng))))
+  (from-rng (rng) :let [n nxt-rng]
+            (if (> n Integer/MIN_VALUE)
+              (make-result (Math/abs ^int n) nxt-rng)
+              (make-result Integer/MAX_VALUE nxt-rng))))
 ;fpins
 (defn non-negative-int-fpins
   "FPINS variant of above function - haha - and I was thinking: Adding one is way too simple :)"
   [rng]
-  (from-rng (rng) :use [n nxt-rng]
-    (if (< n 0)
-      (make-result (- (inc n)) nxt-rng)
-      (make-result n nxt-rng))))
+  (from-rng (rng) :let [n nxt-rng]
+            (if (< n 0)
+              (make-result (- (inc n)) nxt-rng)
+              (make-result n nxt-rng))))
 ;-----------------------------------------------------------------------
 
 ;6.2
@@ -52,14 +52,41 @@
 (defn a-double
   "Generates Double between 0 (inclusive) and 1 (exclusive)"
   [rng]
-  (from-rng (non-negative-int rng) :use [n nxt-rng]
+  (from-rng (non-negative-int rng) :let [n nxt-rng]
             (make-result (double (/ n Integer/MAX_VALUE)) nxt-rng)))
 ;fpins
 (defn a-double-fpins
   "Generates Double between 0 (inclusive) and 1 (exclusive)"
   [rng]
-  (from-rng (non-negative-int rng) :use [n nxt-rng]
+  (from-rng (non-negative-int rng) :let [n nxt-rng]
             (make-result
               (/ n (inc (.doubleValue Integer/MAX_VALUE)))
               nxt-rng)))
 ;-----------------------------------------------------------------------
+
+;6.3
+;mine
+(defn int-double
+  "Generates (int, double) pair"
+  [rng]
+  (from-rng (non-negative-int rng) :let [n nxt-rng]
+            (from-rng (a-double nxt-rng) :let [dbl n-rng]
+                      (make-result [n dbl] n-rng))))
+
+(defn double-int
+  "Generates (double, int) pair"
+  [rng]
+  (from-rng (a-double rng) :let [dbl nxt-rng]
+            (from-rng (non-negative-int nxt-rng) :let [n n-rng]
+                      (make-result [dbl n] n-rng))))
+
+(defn triple-double
+  "Generates 3-tuple (double, double, double)"
+  [rng]
+  (from-rng (a-double rng) :let [d1 r1]
+            (from-rng (a-double r1) :let [d2 r2]
+                      (from-rng (a-double r2) :let [d3 r3]
+                                (make-result [d1 d2 d3] r3)))))
+;fpins
+;well conceptually all the same stuff with difference I've introduced
+;macro (for fun and exercise :) )
