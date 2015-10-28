@@ -145,3 +145,29 @@
 ;fpins
 ;Conceptually - the same
 ;-----------------------------------------------------------------------
+
+;6.6
+;mine
+(defn map-rng-2
+  "map2 for exercise 6.6, takes two actions ra and rb and binary function f which combines results of them"
+  [ra rb f]
+  (fn [rng]
+    (from-rng (ra rng) :let [n1 r1]
+              (from-rng (rb r1) :let [n2 r2]
+                        [(f n1 n2) r2]))))
+;fpins
+;Conceptually - the same
+
+(defn both
+  "Translating 'both' from section 6.4.1 - Combining state actions"
+  [ra rb]
+  (map-rng-2 ra rb #(identity [% %2])))
+
+(def int-double-via-both
+  "int-double via both (via map2 (: )"
+  (both non-negative-int-fpins a-double-fpins))
+
+(def double-int-via-both
+  "double-int via both (via map2 (: )"
+  (both a-double-fpins non-negative-int))
+;-----------------------------------------------------------------------
