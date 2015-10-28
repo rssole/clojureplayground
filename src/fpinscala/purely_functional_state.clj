@@ -125,3 +125,23 @@
                           (go (dec cnt) r2 (cons x xs)))))]
     (go n rng '())))
 ;-----------------------------------------------------------------------
+
+(defn map-rng
+  "Mapping combinator from section 6.4 of fpins"
+  [s f]
+  (fn [rng]
+    (from-rng (s rng) :let [n n-rng]
+              [(f n) n-rng])))
+
+(def non-negative-even-int
+  "Generates non-negative even int and is constructed by means of combinator"
+  (map-rng non-negative-int-fpins #(- % (mod % 2))))
+
+;6.5
+;mine
+(def a-double-via-map-comb
+  "Reimplementing double via mapping combinator"
+  (map-rng non-negative-int #(/ % (inc (.doubleValue Integer/MAX_VALUE)))))
+;fpins
+;Conceptually - the same
+;-----------------------------------------------------------------------
