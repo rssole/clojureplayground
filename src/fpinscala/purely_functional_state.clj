@@ -196,11 +196,11 @@
 ;UPDATE [29.10.2015.] As per fpins variant (see below) fold-right is quite ok in this case as well
 ;fpins
 (defn rng-sequence-fpins
-  "sequence function for exercise 6."
+  "sequence function for exercise 6.7 FPINS variant"
   [fs]
-  (fpinscala.strictness-and-laziness/fold-right
-    (unit '())
-    #(map-rng-2 % %2 (fn [a b] (cons a b)))
+  (fpinscala.strictness-and-laziness/fold-right             ;Notice that this variant is using fold-right
+    (unit '())                                              ;Check out that "unit-produced" function is used as z value (now - it wouldn't be really
+    #(map-rng-2 % %2 (fn [a b] (cons a b)))                 ;correct to say it is "initial" but rather neutral (or terminating?) element
     fs))
 ;THIS WORKS!!! - THUS IN TERMS OF FPINS (AS FAR AS I UNDERSTOOD) Z IS UNIT/NEUTRAL ELEMENT
 
