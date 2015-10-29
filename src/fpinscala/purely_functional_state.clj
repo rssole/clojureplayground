@@ -126,12 +126,17 @@
     (go n rng '())))
 ;-----------------------------------------------------------------------
 
+(defn unit
+  "Unit function from section 6.4 of fpins"
+  [a]
+  (fn [rng] (make-result a rng)))
+
 (defn map-rng
   "Mapping combinator from section 6.4 of fpins"
   [s f]
   (fn [rng]
     (from-rng (s rng) :let [n n-rng]
-              [(f n) n-rng])))
+              (make-result (f n) n-rng))))
 
 (def non-negative-even-int
   "Generates non-negative even int and is constructed by means of combinator"
@@ -154,7 +159,8 @@
   (fn [rng]
     (from-rng (ra rng) :let [n1 r1]
               (from-rng (rb r1) :let [n2 r2]
-                        [(f n1 n2) r2]))))
+                        (println "m2" n1 n2)
+                        (make-result (f n1 n2) r2)))))
 ;fpins
 ;Conceptually - the same
 
@@ -171,3 +177,18 @@
   "double-int via both (via map2 (: )"
   (both a-double-fpins non-negative-int))
 ;-----------------------------------------------------------------------
+
+;6.7
+;mine
+(defn rng-sequence
+  "sequence function for exercise 6.7"
+  [fs]
+  (reduce
+    #(map-rng-2 % %2 (fn [a b]
+                       (if (vector? a)
+                         (conj a b)
+                         [a b])))
+    (first fs)
+    (rest fs)))
+;I am using reduce because my fold-right from strictness-and-laziness is not proper scala translation
+;and does not work correctly...

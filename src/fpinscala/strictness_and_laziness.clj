@@ -81,6 +81,7 @@
 ;-----------------------------------------------------------------------
 
 ;auxiliary - direct translation from book - WARNING! IT IS NOT REALLY LAZY as I am currently not sure how to mimic named/lazy params
+;THIS VERSION OF F-R IS NOT LAZY NOR CORRECT! IT RETURNS Z AS LAST ELEMENT
 (defn fold-right [z f s]
   (let [[h & t] s]
     (if h
