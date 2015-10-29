@@ -159,7 +159,6 @@
   (fn [rng]
     (from-rng (ra rng) :let [n1 r1]
               (from-rng (rb r1) :let [n2 r2]
-                        (println "m2" n1 n2)
                         (make-result (f n1 n2) r2)))))
 ;fpins
 ;Conceptually - the same
@@ -203,4 +202,7 @@
     (unit '())
     #(map-rng-2 % %2 (fn [a b] (cons a b)))
     fs))
-;THIS WORKS!!! - THUS IN TERMS OF FPINS (AS FAR AS I UNDERSTOOD) Z IS UNIT/NEUTRAL ELEMENT (OR PERHAPS - TERMINATING?)
+;THIS WORKS!!! - THUS IN TERMS OF FPINS (AS FAR AS I UNDERSTOOD) Z IS UNIT/NEUTRAL ELEMENT
+
+(defn random-ints-via-rng-sequence [n rng]
+  ((rng-sequence-fpins (repeat n non-negative-int)) rng))
