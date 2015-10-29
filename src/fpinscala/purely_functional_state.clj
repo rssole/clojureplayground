@@ -1,5 +1,5 @@
 (ns fpinscala.purely-functional-state
-  (:use [fpinscala.strictness-and-laziness :only [unfold-fpins take-via-unfold]]))
+  (:use [fpinscala.strictness-and-laziness :only [unfold-fpins take-via-unfold fold-right]]))
 
 (declare simple-rng)
 
@@ -183,7 +183,7 @@
 (defn rng-sequence
   "sequence function for exercise 6.7"
   [fs]
-  (reduce
+  (reduce                                                   ;check out comment below to see why I've used reduce instead of fold-right
     #(map-rng-2 % %2 (fn [a b]
                        (if (vector? a)
                          (conj a b)
@@ -192,3 +192,15 @@
     (rest fs)))
 ;I am using reduce because my fold-right from strictness-and-laziness is not proper scala translation
 ;and does not work correctly...
+;UPDATE [29.10.2015.] Errrr about above, well not necessarily if z parameter is considered
+;as "unit" or "neutral" folding element. See comments around fpinscala.strictness-and-laziness/fold-right
+;UPDATE [29.10.2015.] As per fpins variant (see below) fold-right is quite ok in this case as well
+;fpins
+(defn rng-sequence-fpins
+  "sequence function for exercise 6."
+  [fs]
+  (fpinscala.strictness-and-laziness/fold-right
+    (unit '())
+    #(map-rng-2 % %2 (fn [a b] (cons a b)))
+    fs))
+;THIS WORKS!!! - THUS IN TERMS OF FPINS (AS FAR AS I UNDERSTOOD) Z IS UNIT/NEUTRAL ELEMENT (OR PERHAPS - TERMINATING?)

@@ -81,7 +81,12 @@
 ;-----------------------------------------------------------------------
 
 ;auxiliary - direct translation from book - WARNING! IT IS NOT REALLY LAZY as I am currently not sure how to mimic named/lazy params
-;THIS VERSION OF F-R IS NOT LAZY NOR CORRECT! IT RETURNS Z AS LAST ELEMENT
+;THIS VERSION OF F-R IS NOT LAZY NOR CORRECT! IT RETURNS Z AS LAST ELEMENT - Update [29.10.2015.]: see below
+;UPDATE ON ABOVE: Does not necessarily it is not working correctly,
+;looks like z is actually meant to be "unit" (neutral) element and not necessarily "start" element, thus usages of fold-right
+;in other functions works ok as in all of them z was provided as "neutral" or "unit" whathever term you prefer
+;Update [29.10.2015.] Check out fpinscala.purely-functional-state/rng-sequence-fpins to see why this fold-right
+;seems to be actually correct (at least in scope of fpins book).
 (defn fold-right [z f s]
   (let [[h & t] s]
     (if h
