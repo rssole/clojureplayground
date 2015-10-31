@@ -153,7 +153,7 @@
 
 ;6.6
 ;mine
-(defn map-rng-2
+(defn map2-rng
   "map2 for exercise 6.6, takes two actions ra and rb and binary function f which combines results of them"
   [ra rb f]
   (fn [rng]
@@ -166,7 +166,7 @@
 (defn both
   "Translating 'both' from section 6.4.1 - Combining state actions"
   [ra rb]
-  (map-rng-2 ra rb #(identity [% %2])))
+  (map2-rng ra rb #(identity [% %2])))
 
 (def int-double-via-both
   "int-double via both (via map2 (: )"
@@ -183,7 +183,7 @@
   "sequence function for exercise 6.7"
   [fs]
   (reduce                                                   ;check out comment below to see why I've used reduce instead of fold-right
-    #(map-rng-2 % %2 (fn [a b]
+    #(map2-rng % %2 (fn [a b]
                        (if (vector? a)
                          (conj a b)
                          [a b])))
@@ -200,9 +200,86 @@
   [fs]
   (fpinscala.strictness-and-laziness/fold-right             ;Notice that this variant is using fold-right
     (unit '())                                              ;Check out that "unit-produced" function is used as z value (now - it wouldn't be really
-    #(map-rng-2 % %2 (fn [a b] (cons a b)))                 ;correct to say it is "initial" but rather neutral (or terminating?) element
+    #(map2-rng % %2 (fn [a b] (cons a b)))                 ;correct to say it is "initial" but rather neutral (or terminating?) element
     fs))
 ;THIS WORKS!!! - THUS IN TERMS OF FPINS (AS FAR AS I UNDERSTOOD) Z IS UNIT/NEUTRAL ELEMENT
 
 (defn random-ints-via-rng-sequence [n rng]
   ((rng-sequence-fpins (repeat n non-negative-int)) rng))
+
+;6.8
+;mine
+;I haven't really got the point of what flat-map should look like (I did actually got to some point but got stuck there)
+;I missed the point that g is returning Rand[B] function (check exercise 6.8 text, page 87) and that it
+;accepts RNG
+;fpins
+(defn flat-map
+  "flatMap for exercise 6.8 from FPINS"
+  [f g]
+  #(from-rng (f %) :let [n rng2]
+            ((g n) rng2)))
+
+;nonNegativeLessThan via flatMap
+(defn non-negative-less-than
+  "nonNegativeLessThan for exercise 6.8 of FPINS"
+  [n]
+  (flat-map non-negative-int (fn [x]
+                               (let [m (mod x n)]
+                                 (if (>= (- (+ x (dec n)) m) 0)
+                                   ; Ha! I got it right that >>unit<< should be used here
+                                   (unit m)
+                                   (non-negative-less-than n))))))
+;fpins
+;Conceptually - the same
+
+;6.9
+;mine
+(defn map-via-flat-map
+  "map in terms of flatMap for exercise 6.9 of FPINS"
+  [s f]
+  (flat-map s (fn [x] (unit (f x)))))
+
+;usage example
+(def non-negative-int-via-map-via-flat-map
+  (map-via-flat-map non-negative-int-fpins #(- % (mod % 2))))
+
+(defn map2-via-flat-map
+  "map2 in terms of flatMap for exercise 6.9 of FPINS"
+  [ra rb f]
+  (flat-map ra (fn [n1]
+                 (fn [r1]
+                   (from-rng (rb r1) :let [n2 r2]
+                             (make-result (f n1 n2) r2))))))
+
+;usage example
+(defn both-via-map2-via-flat-map
+  "Translating 'both' from section 6.4.1 - Combining state actions"
+  [ra rb]
+  (map2-via-flat-map ra rb #(identity [% %2])))
+
+(def int-double-via-both-map2-flat-map
+  "int-double via both (via map2 (: )"
+  (both-via-map2-via-flat-map non-negative-int-fpins a-double-fpins))
+
+(def double-int-via-both-map2-flat-map
+  "double-int via both (via map2 (: )"
+  (both-via-map2-via-flat-map a-double-fpins non-negative-int))
+
+;fpins
+;Check this out, this is much better :) of course :)
+(defn map2-via-flat-map-fpins
+  [ra rb f]
+  (flat-map ra (fn [a] (map-rng rb #(f a %)))))
+
+(defn both-via-map2-via-flat-map-fpins
+  "Translating 'both' from section 6.4.1 - Combining state actions"
+  [ra rb]
+  (map2-via-flat-map-fpins ra rb #(identity [% %2])))
+
+(def int-double-via-both-map2-flat-map-fpins
+  "int-double via both (via map2 (: )"
+  (both-via-map2-via-flat-map non-negative-int-fpins a-double-fpins))
+
+(def double-int-via-both-map2-flat-map-fpins
+  "double-int via both (via map2 (: )"
+  (both-via-map2-via-flat-map-fpins a-double-fpins non-negative-int))
