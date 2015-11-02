@@ -283,3 +283,19 @@
 (def double-int-via-both-map2-flat-map-fpins
   "double-int via both (via map2 (: )"
   (both-via-map2-via-flat-map-fpins a-double-fpins non-negative-int))
+
+;6.10
+;Well, given Clojure's dynamic nature, I have nothing special to do
+;for State type and functions apart from re-defining supporting from-rng macro
+;and make-result function to use more generic names for value and new state map entries
+(defmacro from-state [state _ bindings & body]
+  `(let [{~@(interleave bindings [:val :next-state]) ~@[]} ~state]
+     ~@body))
+
+(defn- make-result-state
+  "Auxiliary function to avoid same map creation all over the place"
+  [val next-state]
+  {:val val :next-state next-state})
+;In addition, Clojure does not provide case classes and companion objects as Scala
+;does so existing unit, map, map2, flat-map and sequnce does the job as
+;there is no instance you could invoke method on
