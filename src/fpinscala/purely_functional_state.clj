@@ -299,3 +299,18 @@
 ;In addition, Clojure does not provide case classes and companion objects as Scala
 ;does so existing unit, map, map2, flat-map and sequnce does the job as
 ;there is no instance you could invoke method on
+
+(defn flat-map-s
+  "flatMap for exercise 6.8 from FPINS but generalized to state"
+  [f g]
+  #(from-state (f %) :let [v s]
+             ((g v) s)))
+
+(defn map-via-flat-map-s
+  "map in terms of flatMap for exercise 6.9 of FPINS"
+  [s f]
+  (flat-map-s s (fn [x] (unit (f x)))))
+
+(defn map2-via-flat-map-s
+  [s1 s2 f]
+  (flat-map-s s1 (fn [a] (map-via-flat-map-s s2 #(f a %)))))
