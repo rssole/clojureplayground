@@ -301,16 +301,29 @@
 ;there is no instance you could invoke method on
 
 (defn flat-map-s
-  "flatMap for exercise 6.8 from FPINS but generalized to state"
+  "flatMap for exercise 6.8 from FPINS but generalized to state for exercise 6.10"
   [f g]
   #(from-state (f %) :let [v s]
              ((g v) s)))
 
 (defn map-via-flat-map-s
-  "map in terms of flatMap for exercise 6.9 of FPINS"
+  "Generalized version of map-via-flat-map from exercise 6.9, for exercise 6.10"
   [s f]
   (flat-map-s s (fn [x] (unit (f x)))))
 
 (defn map2-via-flat-map-s
   [s1 s2 f]
   (flat-map-s s1 (fn [a] (map-via-flat-map-s s2 #(f a %)))))
+
+(defn unit-state
+  "Generalized Unit function from section 6.5 of fpins"
+  [a]
+  (fn [rng] (make-result-state a rng)))
+
+(defn state-sequence-fpins
+  "sequence function for exercise 6.7 FPINS variant"
+  [fs]
+  (fpinscala.strictness-and-laziness/fold-right             ;Notice that this variant is using fold-right
+    (unit '())                                              ;Check out that "unit-produced" function is used as z value (now - it wouldn't be really
+    #(map2-via-flat-map-s % %2 (fn [a b] (cons a b)))                 ;correct to say it is "initial" but rather neutral (or terminating?) element
+    fs))
