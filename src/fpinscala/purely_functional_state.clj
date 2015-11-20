@@ -306,10 +306,15 @@
   #(from-state (f %) :let [v s]
              ((g v) s)))
 
+(defn unit-state
+  "Generalized Unit function from section 6.5 of fpins"
+  [a]
+  (fn [rng] (make-result-state a rng)))
+
 (defn map-via-flat-map-s
   "Generalized version of map-via-flat-map from exercise 6.9, for exercise 6.10"
   [s f]
-  (flat-map-s s (fn [x] (unit (f x)))))
+  (flat-map-s s (fn [x] (unit-state (f x)))))
 
 (defn map2-via-flat-map-s
   [s1 s2 f]
@@ -324,6 +329,34 @@
   "sequence function for exercise 6.7 FPINS variant"
   [fs]
   (fpinscala.strictness-and-laziness/fold-right             ;Notice that this variant is using fold-right
-    (unit '())                                              ;Check out that "unit-produced" function is used as z value (now - it wouldn't be really
+    (unit-state '())                                              ;Check out that "unit-produced" function is used as z value (now - it wouldn't be really
     #(map2-via-flat-map-s % %2 (fn [a b] (cons a b)))                 ;correct to say it is "initial" but rather neutral (or terminating?) element
     fs))
+
+(declare simple-rng-s)
+
+(defn make-simple-rng-s
+  "Constructor fn for simple RNGs but customized to work with general state"
+  [seed]
+  (fn []
+    (simple-rng-s seed)))
+
+(defn- simple-rng-s
+  "As per listing 6.2 from FPINS"
+  [^long seed]
+  ;Type hint needed here so multiplication below does not yield int but rather long
+  (let [nseed (bit-and (+ (unchecked-multiply seed 0x5deece66d) 0xb) 0xffffffffffff)
+        ;unchecked-multiply is falling back to Java semantic of multiplication
+        ;to make this working same way as in Scala/FPINS option
+        nxt-rng (make-simple-rng-s nseed)
+        n (.intValue (unsigned-bit-shift-right nseed 16))]
+    (make-result-state n nxt-rng)))
+
+(defn non-negative-int-fpins-s
+  "FPINS variant of above function - haha - and I was thinking: Adding one is way too simple :)"
+  [rng]
+  (from-state (rng) :let [n nxt-rng]
+            (if (< n 0)
+              (make-result-state (- (inc n)) nxt-rng)
+              (make-result-state n nxt-rng))))
+
