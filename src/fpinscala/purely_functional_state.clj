@@ -360,3 +360,5 @@
               (make-result-state (- (inc n)) nxt-rng)
               (make-result-state n nxt-rng))))
 
+;usage example
+((state-sequence-fpins (repeat 5 non-negative-int-fpins-s)) (make-simple-rng-s 42))
