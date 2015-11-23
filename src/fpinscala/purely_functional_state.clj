@@ -320,11 +320,6 @@
   [s1 s2 f]
   (flat-map-s s1 (fn [a] (map-via-flat-map-s s2 #(f a %)))))
 
-(defn unit-state
-  "Generalized Unit function from section 6.5 of fpins"
-  [a]
-  (fn [rng] (make-result-state a rng)))
-
 (defn state-sequence-fpins
   "sequence function for exercise 6.7 FPINS variant"
   [fs]
@@ -362,3 +357,14 @@
 
 ;usage example
 ((state-sequence-fpins (repeat 5 non-negative-int-fpins-s)) (make-simple-rng-s 42))
+
+;map and flat-map difference (afaic):
+;map accepts two functions where first function
+;produces state and second function simply
+;accepts value, maps it and returns new state along with value
+;flat-map also accepts two function where, again, first one
+;accepts produces some state however, second function accepts value
+;but returns function which again accepts some state and will
+;produce new value and next state. This yields flexibility which
+;plain map lacks, flat-map is able to adjust behavior
+;based on value
