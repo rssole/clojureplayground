@@ -1,5 +1,6 @@
 (ns fpinscala.purely-functional-state
-  (:use [fpinscala.strictness-and-laziness :only [unfold-fpins take-via-unfold fold-right]]))
+  (:use [fpinscala.strictness-and-laziness :only [unfold-fpins take-via-unfold fold-right]])
+  (:require [clojure.core.match :refer [match]]))
 
 (declare simple-rng)
 
@@ -292,7 +293,7 @@
   `(let [{~@(interleave bindings [:val :next-state]) ~@[]} ~state]
      ~@body))
 
-(defn- make-result-state
+(defn- make-state
   "Auxiliary function to avoid same map creation all over the place"
   [val next-state]
   {:val val :next-state next-state})
@@ -309,7 +310,7 @@
 (defn unit-state
   "Generalized Unit function from section 6.5 of fpins"
   [a]
-  (fn [rng] (make-result-state a rng)))
+  (fn [rng] (make-state a rng)))
 
 (defn map-via-flat-map-s
   "Generalized version of map-via-flat-map from exercise 6.9, for exercise 6.10"
@@ -326,7 +327,8 @@
   (fpinscala.strictness-and-laziness/fold-right             ;Notice that this variant is using fold-right
     (unit-state '())                                              ;Check out that "unit-produced" function is used as z value (now - it wouldn't be really
     #(map2-via-flat-map-s % %2 (fn [a b] (cons a b)))                 ;correct to say it is "initial" but rather neutral (or terminating?) element
-    fs))
+    fs))                                                    ;UPDATE (25.11.2015) Check out wikipedia about monad, it is actually "return" also
+                                                            ;called "unit" operation of a monad
 
 (declare simple-rng-s)
 
@@ -345,15 +347,15 @@
         ;to make this working same way as in Scala/FPINS option
         nxt-rng (make-simple-rng-s nseed)
         n (.intValue (unsigned-bit-shift-right nseed 16))]
-    (make-result-state n nxt-rng)))
+    (make-state n nxt-rng)))
 
 (defn non-negative-int-fpins-s
-  "FPINS variant of above function - haha - and I was thinking: Adding one is way too simple :)"
+  "FPINS variant of non-negative-int function, adapted to 'state' variant - haha - and I was thinking: Adding one is way too simple :)"
   [rng]
   (from-state (rng) :let [n nxt-rng]
             (if (< n 0)
-              (make-result-state (- (inc n)) nxt-rng)
-              (make-result-state n nxt-rng))))
+              (make-state (- (inc n)) nxt-rng)
+              (make-state n nxt-rng))))
 
 ;usage example
 ((state-sequence-fpins (repeat 5 non-negative-int-fpins-s)) (make-simple-rng-s 42))
@@ -368,3 +370,28 @@
 ;produce new value and next state. This yields flexibility which
 ;plain map lacks, flat-map is able to adjust behavior
 ;based on value
+
+;here - I try to mimic get, set and modify of FPINS/6.6
+(def get-state (fn [s] (make-state s s)))
+(def set-state (fn [s] (make-state nil s)))
+;(def modify-state (fn [s f]
+;                    (for [])))
+
+;here is step-machine function from Runar Bjarnasson's explanation of 6.1 on fpins google group
+;it is using core.match as writing with if, cond etc would make it ridiculously complex
+
+(defn machine [locked candies coins]
+         {:locked locked :candies candies :coins coins})
+
+(defn step-machine
+  "inputs is sequence of either coins or turns, s is 'machine' in focus"
+  [i s]
+  (match [i s]
+         [_ {:locked _ :candies 0 :coins _}] s
+         [:coin {:locked false :candies _ :coins _}] s
+         [:turn {:locked true :candies _ :coins _}] s
+         [:coin {:locked true :candies candies :coins coins}]
+         (machine false candies (inc coins))
+         [:turn {:locked false :candies candies :coins coins}]
+         (machine true (dec candies) coins)))
+
