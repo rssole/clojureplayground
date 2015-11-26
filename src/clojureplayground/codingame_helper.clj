@@ -1,27 +1,5 @@
 (ns clojureplayground.codingame-helper)
 
-(defn thor-move1 [adj opp theta]
-  (if (>= adj 0)
-    (if (>= opp 0)
-      (cond
-        (<= theta (/ Math/PI 8)) {:x 1 :y 0 :dir "E"}
-        (and (> theta (/ Math/PI 8)) (<= theta (* Math/PI 0.375))) {:x 1 :y 1 :dir "SE"}
-        (and (> theta (* Math/PI 0.375)) (<= theta (/ Math/PI 2))) {:x 0 :y 1 :dir "S"})
-      (cond
-        (<= theta (/ Math/PI 8)) {:x 1 :y 0 :dir "E"}
-        (and (> theta (/ Math/PI 8)) (<= theta (* Math/PI 0.375))) {:x 1 :y -1 :dir "NE"}
-        (and (> theta (* Math/PI 0.375)) (<= theta (/ Math/PI 2))) {:x 0 :y -1 :dir "N"}))
-    (if (>= opp 0)
-      (cond
-        (<= theta (/ Math/PI 8)) {:x -1 :y 0 :dir "W"}
-        (and (> theta (/ Math/PI 8)) (<= theta (* Math/PI 0.375))) {:x -1 :y 1 :dir "SW"}
-        (and (> theta (* Math/PI 0.375)) (<= theta (/ Math/PI 2))) {:x 0 :y 1 :dir "S"})
-      (cond
-        (<= theta (/ Math/PI 8)) {:x -1 :y 0 :dir "W"}
-        (and (> theta (/ Math/PI 8)) (<= theta (* Math/PI 0.375))) {:x -1 :y -1 :dir "NW"}
-        (and (> theta (* Math/PI 0.375)) (<= theta (/ Math/PI 2))) {:x 0 :y -1 :dir "N"}))
-    ))
-
 (defn direction [adj opp]
   (if (neg? adj)
     (if (neg? opp) 3 2)
