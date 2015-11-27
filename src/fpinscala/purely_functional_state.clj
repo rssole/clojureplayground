@@ -120,10 +120,10 @@
   "Generates list of random integers - fpins variant 2 - TAIL RECURSIVE - outcome is reversed though but apparently it does not matter"
   [n rng]
   (letfn [(go [cnt r xs]
-              (if (zero? cnt)
-                [xs r]
-                (from-rng (r) :let [x r2]
-                          (go (dec cnt) r2 (cons x xs)))))]
+            (if (zero? cnt)
+              [xs r]
+              (from-rng (r) :let [x r2]
+                        (go (dec cnt) r2 (cons x xs)))))]
     (go n rng '())))
 ;-----------------------------------------------------------------------
 
@@ -185,9 +185,9 @@
   [fs]
   (reduce                                                   ;check out comment below to see why I've used reduce instead of fold-right
     #(map2-rng % %2 (fn [a b]
-                       (if (vector? a)
-                         (conj a b)
-                         [a b])))
+                      (if (vector? a)
+                        (conj a b)
+                        [a b])))
     (first fs)
     (rest fs)))
 ;I am using reduce because my fold-right from strictness-and-laziness is not proper scala translation
@@ -201,7 +201,7 @@
   [fs]
   (fpinscala.strictness-and-laziness/fold-right             ;Notice that this variant is using fold-right
     (unit '())                                              ;Check out that "unit-produced" function is used as z value (now - it wouldn't be really
-    #(map2-rng % %2 (fn [a b] (cons a b)))                 ;correct to say it is "initial" but rather neutral (or terminating?) element
+    #(map2-rng % %2 (fn [a b] (cons a b)))                  ;correct to say it is "initial" but rather neutral (or terminating?) element
     fs))
 ;THIS WORKS!!! - THUS IN TERMS OF FPINS (AS FAR AS I UNDERSTOOD) Z IS UNIT/NEUTRAL ELEMENT
 
@@ -218,7 +218,7 @@
   "flatMap for exercise 6.8 from FPINS"
   [f g]
   #(from-rng (f %) :let [n rng2]
-            ((g n) rng2)))
+             ((g n) rng2)))
 
 ;nonNegativeLessThan via flatMap
 (defn non-negative-less-than
@@ -305,7 +305,7 @@
   "flatMap for exercise 6.8 from FPINS but generalized to state for exercise 6.10"
   [f g]
   #(from-state (f %) :let [v s]
-             ((g v) s)))
+               ((g v) s)))
 
 (defn unit-state
   "Generalized Unit function from section 6.5 of fpins"
@@ -325,10 +325,10 @@
   "sequence function for exercise 6.7 FPINS variant"
   [fs]
   (fpinscala.strictness-and-laziness/fold-right             ;Notice that this variant is using fold-right
-    (unit-state '())                                              ;Check out that "unit-produced" function is used as z value (now - it wouldn't be really
-    #(map2-via-flat-map-s % %2 (fn [a b] (cons a b)))                 ;correct to say it is "initial" but rather neutral (or terminating?) element
+    (unit-state '())                                        ;Check out that "unit-produced" function is used as z value (now - it wouldn't be really
+    #(map2-via-flat-map-s % %2 (fn [a b] (cons a b)))       ;correct to say it is "initial" but rather neutral (or terminating?) element
     fs))                                                    ;UPDATE (25.11.2015) Check out wikipedia about monad, it is actually "return" also
-                                                            ;called "unit" operation of a monad
+;called "unit" operation of a monad
 
 (declare simple-rng-s)
 
@@ -353,9 +353,9 @@
   "FPINS variant of non-negative-int function, adapted to 'state' variant - haha - and I was thinking: Adding one is way too simple :)"
   [rng]
   (from-state (rng) :let [n nxt-rng]
-            (if (< n 0)
-              (make-state (- (inc n)) nxt-rng)
-              (make-state n nxt-rng))))
+              (if (< n 0)
+                (make-state (- (inc n)) nxt-rng)
+                (make-state n nxt-rng))))
 
 ;usage example
 ((state-sequence-fpins (repeat 5 non-negative-int-fpins-s)) (make-simple-rng-s 42))
@@ -374,14 +374,16 @@
 ;here - I try to mimic get, set and modify of FPINS/6.6
 (def get-state (fn [s] (make-state s s)))
 (def set-state (fn [s] (make-state nil s)))
-;(def modify-state (fn [s f]
-;                    (for [])))
+(def modify-state (fn [s f]
+                    (for [v (get-state s)
+                          ns (set-state (f v))]
+                      ns)))
 
 ;here is step-machine function from Runar Bjarnasson's explanation of 6.1 on fpins google group
 ;it is using core.match as writing with if, cond etc would make it ridiculously complex
 
 (defn machine [locked candies coins]
-         {:locked locked :candies candies :coins coins})
+  {:locked locked :candies candies :coins coins})
 
 (defn step-machine
   "inputs is sequence of either coins or turns, s is 'machine' in focus"
@@ -394,4 +396,6 @@
          (machine false candies (inc coins))
          [:turn {:locked false :candies candies :coins coins}]
          (machine true (dec candies) coins)))
+
+
 
