@@ -372,12 +372,13 @@
 ;based on value
 
 ;here - I try to mimic get, set and modify of FPINS/6.6
-(def get-state (fn [s] (make-state s s)))
-(def set-state (fn [s] (make-state nil s)))
-(def modify-state (fn [s f]
-                    (for [v (get-state s)
-                          ns (set-state (f v))]
-                      ns)))
+(def get-state (fn [s] (make-state (:val s) (:val s))))
+(def set-state (fn [s] (make-state nil (:val s))))
+(def modify-state (fn [f]
+                    (fn [s]
+                      (let [ns (get-state s)]
+                        (set-state (f ns))))))
+;now when step-machine is in place - to re-think get, set and modify...
 
 ;here is step-machine function from Runar Bjarnasson's explanation of 6.1 on fpins google group
 ;it is using core.match as writing with if, cond etc would make it ridiculously complex
@@ -385,17 +386,23 @@
 (defn machine [locked candies coins]
   {:locked locked :candies candies :coins coins})
 
+;Hey Rastko, yes you! You need to read more carefully :)
+;well, it seems I'd need to know Scala a bit better.
+;In fpins solution Candy.update is function that produces function
+;to be more specific, for given input it produces function which accepts state (machine)
+;and produces function which matches given input and provided state
 (defn step-machine
   "inputs is sequence of either coins or turns, s is 'machine' in focus"
-  [i s]
-  (match [i s]
+  [i]
+  (fn [s]
+    (match [i s]
          [_ {:locked _ :candies 0 :coins _}] s
          [:coin {:locked false :candies _ :coins _}] s
          [:turn {:locked true :candies _ :coins _}] s
          [:coin {:locked true :candies candies :coins coins}]
          (machine false candies (inc coins))
          [:turn {:locked false :candies candies :coins coins}]
-         (machine true (dec candies) coins)))
+         (machine true (dec candies) coins))))
 
 
 
