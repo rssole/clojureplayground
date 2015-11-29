@@ -372,12 +372,11 @@
 ;based on value
 
 ;here - I try to mimic get, set and modify of FPINS/6.6
-(def get-state (fn [s] (make-state (:val s) (:val s))))
-(def set-state (fn [s] (make-state nil (:val s))))
-(def modify-state (fn [f]
-                    (fn [s]
-                      (let [ns (get-state s)]
-                        (set-state (f ns))))))
+(defn get-state [s] (make-state (:val s) (:val s)))
+(defn set-state [v] (make-state nil v))
+(defn modify-state [f]
+  (flat-map-s get-state (fn [s] (set-state (f s)))))
+
 ;now when step-machine is in place - to re-think get, set and modify...
 
 ;here is step-machine function from Runar Bjarnasson's explanation of 6.1 on fpins google group
