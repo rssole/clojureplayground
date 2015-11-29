@@ -375,7 +375,8 @@
 (defn get-state [s] (make-state (:val s) (:val s)))
 (defn set-state [v] (make-state nil v))
 (defn modify-state [f]
-  (flat-map-s get-state (fn [s] (set-state (f s)))))
+  (flat-map-s get-state (fn [v] (fn [_] (let [fs (f v)]
+                                          (set-state fs))))))
 
 ;now when step-machine is in place - to re-think get, set and modify...
 
@@ -394,6 +395,7 @@
   "inputs is sequence of either coins or turns, s is 'machine' in focus"
   [i]
   (fn [s]
+    (println s)
     (match [i s]
          [_ {:locked _ :candies 0 :coins _}] s
          [:coin {:locked false :candies _ :coins _}] s
@@ -402,6 +404,3 @@
          (machine false candies (inc coins))
          [:turn {:locked false :candies candies :coins coins}]
          (machine true (dec candies) coins))))
-
-
-
