@@ -401,7 +401,12 @@
          [:coin {:locked true :candies candies :coins coins}] (make-state (machine false candies (inc coins)) nil)
          [:turn {:locked false :candies candies :coins coins}] (make-state (machine true (dec candies) coins) nil))))
 
+;This is finally, at least - something, not even close Scala variant from FPINS but it is what I could manage
+;with Clojure knowledge at the moment and Scala knowledge (if any) at the moment, I am aware more or less what and how
+;Scala option is doing but moving on anyway as I have no time to go over again. Maybe I'll back to it later.
 (defn simulate-machine [inputs]
   (fn [m]
     (let [{{{:keys [coins candies]} :val} :next-state} ((state-sequence-fpins (map #(modify-state (step-machine %)) inputs)) (make-state m nil))]
       [coins candies])))
+;Where as Scala FPINS variant yields proper State[Machine, (Int, Int)], mine returns just desired "yield" output of FPINS solution
+
