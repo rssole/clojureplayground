@@ -305,12 +305,12 @@
   "flatMap for exercise 6.8 from FPINS but generalized to state for exercise 6.10"
   [f g]
   #(from-state (f %) :let [v s]
-               ((g v) s)))
+              ((g v) s)))
 
 (defn unit-state
   "Generalized Unit function from section 6.5 of fpins"
   [a]
-  (fn [rng] (make-state a rng)))
+  (fn [s] (make-state a s)))
 
 (defn map-via-flat-map-s
   "Generalized version of map-via-flat-map from exercise 6.9, for exercise 6.10"
@@ -328,7 +328,7 @@
     (unit-state '())                                        ;Check out that "unit-produced" function is used as z value (now - it wouldn't be really
     #(map2-via-flat-map-s % %2 (fn [a b] (cons a b)))       ;correct to say it is "initial" but rather neutral (or terminating?) element
     fs))                                                    ;UPDATE (25.11.2015) Check out wikipedia about monad, it is actually "return" also
-;called "unit" operation of a monad
+                                                            ;called "unit" operation of a monad
 
 (declare simple-rng-s)
 
@@ -394,12 +394,14 @@
   "inputs is sequence of either coins or turns, s is 'machine' in focus"
   [i]
   (fn [s]
-    (println s)
     (match [i s]
-         [_ {:locked _ :candies 0 :coins _}] s
-         [:coin {:locked false :candies _ :coins _}] s
-         [:turn {:locked true :candies _ :coins _}] s
-         [:coin {:locked true :candies candies :coins coins}]
-         (machine false candies (inc coins))
-         [:turn {:locked false :candies candies :coins coins}]
-         (machine true (dec candies) coins))))
+         [_ {:locked _ :candies 0 :coins _}] (make-state s nil)
+         [:coin {:locked false :candies _ :coins _}] (make-state s nil)
+         [:turn {:locked true :candies _ :coins _}] (make-state s nil)
+         [:coin {:locked true :candies candies :coins coins}] (make-state (machine false candies (inc coins)) nil)
+         [:turn {:locked false :candies candies :coins coins}] (make-state (machine true (dec candies) coins) nil))))
+
+(defn simulate-machine [inputs]
+  (fn [m]
+    (let [{{{:keys [coins candies]} :val} :next-state} ((state-sequence-fpins (map #(modify-state (step-machine %)) inputs)) (make-state m nil))]
+      [coins candies])))
