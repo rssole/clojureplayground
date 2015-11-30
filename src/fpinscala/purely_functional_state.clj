@@ -375,8 +375,7 @@
 (defn get-state [s] (make-state (:val s) (:val s)))
 (defn set-state [v] (make-state nil v))
 (defn modify-state [f]
-  (flat-map-s get-state (fn [v] (fn [_] (let [fs (f v)]
-                                          (set-state fs))))))
+  (flat-map-s get-state (fn [v] (fn [_] (set-state (f v))))))
 
 ;now when step-machine is in place - to re-think get, set and modify...
 
