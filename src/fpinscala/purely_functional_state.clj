@@ -409,4 +409,6 @@
     (let [{{{:keys [coins candies]} :val} :next-state} ((state-sequence-fpins (map #(modify-state (step-machine %)) inputs)) (make-state m nil))]
       [coins candies])))
 ;Where as Scala FPINS variant yields proper State[Machine, (Int, Int)], mine returns just desired "yield" output of FPINS solution
+;This require revision of map and flatMap functions as well as get-state and set-state, well.. everything in
+;scope of this exercise (6.11)
 
