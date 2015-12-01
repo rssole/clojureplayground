@@ -25,10 +25,11 @@
 
 ;problem 86
 ((fn [x]
-   (letfn [(square [y] (* y y))]
-     (loop [s (str x)]
-       (let [s2 (reduce + (map #(square (Integer/parseInt (str %))) s))]
+   (letfn [(square-ch [y] (let [n (Integer/parseInt (str y))] (* n n)))]
+     (loop [s (str x) ctrl #{}]
+       (let [s2 (reduce + (map #(square-ch %) s))]
+         (println s2)
          (cond
            (= s2 1) true
-           (= s2 x) false
-           :else (recur (str s2))))))) 2)
+           (ctrl s2) false
+           :else (recur (str s2) (conj ctrl s2))))))) 7)
