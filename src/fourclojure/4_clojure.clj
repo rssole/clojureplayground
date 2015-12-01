@@ -11,4 +11,6 @@
 ;problem 70
 ((fn [s]
    (let [[a & others] (clojure.string/split s (re-pattern "-"))]
-     (apply str a (map #(let [[x & ys] %] (apply str (Character/toUpperCase x) ys)) others)))) "multi-word-key")
+     (apply str a
+            (map #(let [[x & ys] %]
+                    (apply str (Character/toUpperCase x) ys)) others)))) "multi-word-key")
