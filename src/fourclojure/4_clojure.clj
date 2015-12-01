@@ -14,3 +14,21 @@
      (apply str a
             (map #(let [[x & ys] %]
                     (apply str (Character/toUpperCase x) ys)) others)))) "multi-word-key")
+
+;problem 75
+((fn [x] (letfn [(gcd [a b]
+                   (loop [ia a ib b]
+                     (if (= ib 0)
+                       ia
+                       (recur ib (mod ia ib)))))]
+           (count (filter #(= 1 (gcd % x)) (range 1 (inc x)))))) 99)
+
+;problem 86
+((fn [x]
+   (letfn [(square [y] (* y y))]
+     (loop [s (str x)]
+       (let [s2 (reduce + (map #(square (Integer/parseInt (str %))) s))]
+         (cond
+           (= s2 1) true
+           (= s2 x) false
+           :else (recur (str s2))))))) 2)
