@@ -28,7 +28,6 @@
    (letfn [(square-ch [y] (let [n (Integer/parseInt (str y))] (* n n)))]
      (loop [s (str x) ctrl #{}]
        (let [s2 (reduce + (map #(square-ch %) s))]
-         (println s2)
          (cond
            (= s2 1) true
            (ctrl s2) false
