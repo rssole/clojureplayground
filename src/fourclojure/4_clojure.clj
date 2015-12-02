@@ -42,3 +42,12 @@
        (if (ifn? g)
          (recur (g))
          g))) triple 2))
+
+;problem 115 the balance of n
+((fn balance-n [x]
+   (letfn [(divide [s]
+             (let [len (count s) half (int (/ len 2))]
+               (if (even? len) (partition half s) [(take half s) (drop (inc half) s)])))
+           (sum [chs] (reduce + 0 (map #(Integer/parseInt (str %)) chs)))]
+     (let [sx (str x) [l r] (divide sx)]
+       (= (sum l) (sum r))))) 11)
