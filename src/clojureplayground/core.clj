@@ -40,7 +40,7 @@
 ;    (loop [elem x acc '()]
 ;      (if (coll? elem) (recur elem acc) (conj acc elem)))))
 ;
-;(print (my-flatten input))
+;(print (my-flatten day1-input))
 
 ;4clojure infix calculator
 

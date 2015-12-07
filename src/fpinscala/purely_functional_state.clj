@@ -388,8 +388,8 @@
 ;Hey Rastko, yes you! You need to read more carefully :)
 ;well, it seems I'd need to know Scala a bit better.
 ;In fpins solution Candy.update is function that produces function
-;to be more specific, for given input it produces function which accepts state (machine)
-;and produces function which matches given input and provided state
+;to be more specific, for given day1-input it produces function which accepts state (machine)
+;and produces function which matches given day1-input and provided state
 (defn step-machine
   "inputs is sequence of either coins or turns, s is 'machine' in focus"
   [i]

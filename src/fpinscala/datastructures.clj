@@ -92,7 +92,7 @@
 ;we spot 0.0?
 ;-----------------------------------------------------------------------
 
-;3.8 - it yields equivalent list as input
+;3.8 - it yields equivalent list as day1-input
 ;check out for thorough explanation in exercises answers of fpins
 ;-----------------------------------------------------------------------
 
