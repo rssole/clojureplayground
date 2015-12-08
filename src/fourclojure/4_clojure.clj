@@ -51,3 +51,14 @@
            (sum [chs] (reduce + 0 (map #(Integer/parseInt (str %)) chs)))]
      (let [sx (str x) [l r] (divide sx)]
        (= (sum l) (sum r))))) 11)
+
+; powerset :S
+((fn pset [s]
+   (letfn [(psts [s]
+             (loop [is s acc #{s}]
+               (println is)
+               (if (empty? is)
+                 (into acc #{is})
+                 (recur (disj is (first is)) (into acc (for [a is] (disj is a)))))))]
+     (flatten (for [a s]
+                 (psts (disj s a)))))) (into #{} (range 10)))
