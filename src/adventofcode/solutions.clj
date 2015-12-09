@@ -101,22 +101,30 @@
               input))))
 
 ; day 6
-(def ^{:private true} instruction-regex #"(\w+) (?<x0>\d+),(?<y0>\d+) through (?<x1>\d+),(?<y1>\d+)")
+(def ^{:private true} day6-instruction-regex #"(\w+) (?<x0>\d+),(?<y0>\d+) through (?<x1>\d+),(?<y1>\d+)")
 
 (defn- get-instruction [line]
-  (let [[[_ action x0 y0 x1 y1]] (re-seq instruction-regex line)
+  (let [[[_ action x0 y0 x1 y1]] (re-seq day6-instruction-regex line)
         s2int #(Integer/parseInt %)]
     [(keyword action) (s2int x0) (s2int y0) (s2int x1) (s2int y1)]))
 
-(def ^{:private true} actions {:off    #(time (aset-int % %2 %3 0))
-                               :on     #(time (aset-int % %2 %3 1))
-                               :toggle #(let [val (aget ^ints % %2 %3)
-                                             new-val (if (zero? val) 1 0)]
-                                         (aset-int % %2 %3 new-val))})
+(def ^{:private true} actions-1 {:off    #(aset-int % %2 %3 0)
+                                 :on     #(aset-int % %2 %3 1)
+                                 :toggle #(let [val (aget ^ints % %2 %3)
+                                                new-val (if (zero? val) 1 0)]
+                                           (aset-int % %2 %3 new-val))})
 
-(defn day6 []
-  (let [input (take 5 (day-input-line-seq 6))
-        board (into-array (map int-array (repeatedly 1000 #(repeat 1000 0))))]
+(def ^{:private true} actions-2 {:off    #(let [val (aget ^ints % %2 %3)]
+                                           (when (pos? val)
+                                             (aset-int % %2 %3 (dec val))))
+                                 :on     #(let [val (aget ^ints % %2 %3)]
+                                           (aset-int % %2 %3 (inc val)))
+                                 :toggle #(let [val (aget ^ints % %2 %3)]
+                                           (aset-int % %2 %3 (+ 2 val)))})
+
+(defn- day6-stub [actions rf]
+  (let [input (day-input-line-seq 6)
+        board (make-array Integer/TYPE 1000 1000)]
     (doseq [l input]
       (let [[action x0 y0 x1 y1] (get-instruction l)
             x-rng (range x0 (inc x1))
@@ -124,5 +132,11 @@
             act (action actions)]
         (doseq [x x-rng y y-rng]
           (act board x y))))
-    (reduce #(+ % (count (filter (fn [x] (= 1 x)) %2))) 0 board)))
+    (reduce rf 0 board)))
+
+(defn day6 []
+  (day6-stub actions-1 #(+ % (count (filter (fn [x] (= 1 x)) %2)))))
+
+(defn day6-part2 []
+  (day6-stub actions-2 #(+ % (reduce + 0 %2))))
 
