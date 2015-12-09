@@ -13,7 +13,7 @@
    (let [[a & others] (clojure.string/split s (re-pattern "-"))]
      (apply str a
             (map #(let [[x & ys] %]
-                    (apply str (Character/toUpperCase x) ys)) others)))) "multi-word-key")
+                   (apply str (Character/toUpperCase x) ys)) others)))) "multi-word-key")
 
 ;problem Euler's totient function
 ((fn [x] (letfn [(gcd [a b]
@@ -35,7 +35,7 @@
 
 ;problem 78 reimplement trampoline
 (letfn [(triple [x] #(sub-two (* 3 x)))
-        (sub-two [x] #(stop?(- x 2)))
+        (sub-two [x] #(stop? (- x 2)))
         (stop? [x] (if (> x 50) x #(triple x)))]
   ((fn my-trampo [f & args]
      (loop [g (apply f args)]
@@ -53,12 +53,12 @@
        (= (sum l) (sum r))))) 11)
 
 ; powerset :S
-((fn pset [s]
-   (letfn [(psts [s]
-             (loop [is s acc #{s}]
-               (println is)
-               (if (empty? is)
-                 (into acc #{is})
-                 (recur (disj is (first is)) (into acc (for [a is] (disj is a)))))))]
-     (flatten (for [a s]
-                 (psts (disj s a)))))) (into #{} (range 10)))
+(count
+  ((fn [s]
+     (letfn [(subs [s]
+               (for [a s] (disj (set s) a)))]
+       (loop [is s acc #{s}]
+         (let [h (first is) t (disj is h) st (subs is)]
+           (if (not (empty? st))
+             (recur t (into acc (into st (set (for [ss st] (conj ss h))))))
+             acc))))) (into #{} (range 10))))

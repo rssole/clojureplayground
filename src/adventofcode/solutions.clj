@@ -48,7 +48,7 @@
                 [[0 0] #{[0 0]}]
                 input)))))
 
-; day 3 part 2... pending :)
+; day 3 part 2...
 (defn day3-part2 []
   (let [input (partition 2 (slurp-day-input 3))]
     (count
@@ -99,4 +99,30 @@
                             a)))
               []
               input))))
+
+; day 6
+(def ^{:private true} instruction-regex #"(\w+) (?<x0>\d+),(?<y0>\d+) through (?<x1>\d+),(?<y1>\d+)")
+
+(defn- get-instruction [line]
+  (let [[[_ action x0 y0 x1 y1]] (re-seq instruction-regex line)
+        s2int #(Integer/parseInt %)]
+    [(keyword action) (s2int x0) (s2int y0) (s2int x1) (s2int y1)]))
+
+(def ^{:private true} actions {:off    #(aset-int % %2 %3 0)
+                               :on     #(aset-int % %2 %3 1)
+                               :toggle #(let [val (aget % %2 %3)
+                                              new-val (if (zero? val) 1 0)]
+                                         (aset-int % %2 %3 new-val))})
+
+(defn day6 []
+  (let [input (take 5 (day-input-line-seq 6))
+        board (into-array (map int-array (repeatedly 1000 #(repeat 1000 0))))]
+    (doseq [l input]
+      (let [[action x0 y0 x1 y1] (get-instruction l)
+            x-rng (range x0 (inc x1))
+            y-rng (range y0 (inc y1))
+            act (action actions)]
+        (doseq [x x-rng y y-rng]
+          (act board x y))))
+    (reduce #(+ % (count (filter (fn [x] (= 1 x)) %2))) 0 board)))
 
