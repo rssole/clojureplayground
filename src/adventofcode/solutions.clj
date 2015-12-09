@@ -108,10 +108,10 @@
         s2int #(Integer/parseInt %)]
     [(keyword action) (s2int x0) (s2int y0) (s2int x1) (s2int y1)]))
 
-(def ^{:private true} actions {:off    #(aset-int % %2 %3 0)
-                               :on     #(aset-int % %2 %3 1)
-                               :toggle #(let [val (aget % %2 %3)
-                                              new-val (if (zero? val) 1 0)]
+(def ^{:private true} actions {:off    #(time (aset-int % %2 %3 0))
+                               :on     #(time (aset-int % %2 %3 1))
+                               :toggle #(let [val (aget ^ints % %2 %3)
+                                             new-val (if (zero? val) 1 0)]
                                          (aset-int % %2 %3 new-val))})
 
 (defn day6 []
