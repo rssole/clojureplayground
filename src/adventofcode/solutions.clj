@@ -103,7 +103,7 @@
 ; day 6
 (def ^{:private true} day6-instruction-regex #"(\w+) (?<x0>\d+),(?<y0>\d+) through (?<x1>\d+),(?<y1>\d+)")
 
-(defn- get-instruction [line]
+(defn- day6-get-instruction [line]
   (let [[[_ action x0 y0 x1 y1]] (re-seq day6-instruction-regex line)
         s2int #(Integer/parseInt %)]
     [(keyword action) (s2int x0) (s2int y0) (s2int x1) (s2int y1)]))
@@ -126,7 +126,7 @@
   (let [input (day-input-line-seq 6)
         board (make-array Integer/TYPE 1000 1000)]
     (doseq [l input]
-      (let [[action x0 y0 x1 y1] (get-instruction l)
+      (let [[action x0 y0 x1 y1] (day6-get-instruction l)
             x-rng (range x0 (inc x1))
             y-rng (range y0 (inc y1))
             act (action actions)]
