@@ -174,6 +174,7 @@
     (if (contains? m target)
       m
       (m/match [instr]
+               ; matches below probably could be simplified by means of "guards"
                [{:oper nil :lwire nil :rwire rw :rw-num nil}] (if (contains? m rw)
                                                                 (assoc m target (get m rw))
                                                                 m)
