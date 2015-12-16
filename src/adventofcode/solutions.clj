@@ -1,5 +1,7 @@
 (ns adventofcode.solutions
-  (:require [clojure.java.io :as io])
+  (:require [clojure.java.io :as io]
+            [clojure.string :as st]
+            [clojure.core.match :as m])
   (:import (java.security MessageDigest)))
 
 
@@ -101,11 +103,12 @@
               input))))
 
 ; day 6
+(defn- s2int [s] (Integer/parseInt s))
+
 (def ^{:private true} day6-instruction-regex #"(\w+) (?<x0>\d+),(?<y0>\d+) through (?<x1>\d+),(?<y1>\d+)")
 
 (defn- day6-get-instruction [line]
-  (let [[[_ action x0 y0 x1 y1]] (re-seq day6-instruction-regex line)
-        s2int #(Integer/parseInt %)]
+  (let [[[_ action x0 y0 x1 y1]] (re-seq day6-instruction-regex line)]
     [(keyword action) (s2int x0) (s2int y0) (s2int x1) (s2int y1)]))
 
 (def ^{:private true} actions-1 {:off    #(aset-int % %2 %3 0)
@@ -139,4 +142,64 @@
 
 (defn day6-part2 []
   (day6-stub actions-2 #(+ % (reduce + 0 %2))))
+
+; day 7
+(def day7-get-instruction-regex #"(((\w+|\d+) )?(\w+) )?(\d+|\w+) -> (\w+)")
+
+(defn day7-instr-parts [line]
+  (first (re-seq day7-get-instruction-regex line)))
+
+(defn is-integer
+  "Very basic check just for purpose of day 7"
+  [s]
+  (some? (re-matches #"\d+" s)))
+
+(defn to-int [s]
+  (when (and (not (st/blank? s)) (is-integer s))
+    (s2int s)))
+
+(defn day-7-get-instruction [line]
+  (let [[_ _ _ lw oper rw target] (day7-instr-parts line)
+        lw-num (to-int lw) rw-num (to-int rw)]
+    {:lwire lw :lw-num lw-num :oper (keyword oper) :rwire rw :rw-num rw-num :target target}))
+
+(def operations {:RSHIFT #(bit-shift-right % %2)
+                 :LSHIFT #(bit-shift-left % %2)
+                 :NOT    bit-not
+                 :OR     bit-or
+                 :AND    bit-and})
+
+(defn day-7-reducing-f [m instr]
+  (let [{target :target} instr]
+    (if (contains? m target)
+      m
+      (m/match [instr]
+               [{:oper nil :lwire nil :rwire rw :rw-num nil}] (if (contains? m rw)
+                                                                (assoc m target (get m rw))
+                                                                m)
+               [{:oper nil :rw-num rn}] (assoc m target rn)
+               [{:oper o :lwire nil :rwire rw :rw-num nil}] (if (contains? m rw)
+                                                              (assoc m target ((o operations) (get m rw)))
+                                                              m)
+               [{:oper o :lwire nil :rwire _ :rw-num rn}] (assoc m target ((o operations) rn))
+               [{:oper o :lwire lw :lw-num nil :rwire rw :rw-num nil}] (if (and (contains? m lw) (contains? m rw))
+                                                                         (assoc m target ((o operations) (get m lw) (get m rw)))
+                                                                         m)
+               [{:oper o :lwire _ :lw-num ln :rwire rw :rw-num nil}] (if (contains? m rw)
+                                                                       (assoc m target ((o operations) ln (get m rw)))
+                                                                       m)
+               [{:oper o :lwire lw :lw-num nil :rwire _ :rw-num rn}] (if (contains? m lw)
+                                                                       (assoc m target ((o operations) (get m lw) rn))
+                                                                       m)
+               :else m))))
+
+(defn day7 []
+  (let [input (map day-7-get-instruction (day-input-line-seq 7))]
+    (loop [resolved {}]
+      (let [new-resolved (reduce day-7-reducing-f resolved input)]
+        (if (contains? resolved "a")
+          resolved
+          (recur new-resolved))))))
+
+;for part 2 just place value retrieved for wire a to wire b in input for day 7:)
 
