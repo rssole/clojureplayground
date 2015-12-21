@@ -238,15 +238,31 @@
               #"(?<ascii>\\x[0-9a-f]{2})"
               #"(?<sinq>\\\")"])
 
+(defn- d8-resolver [acc line]
+  (let [cnt (count line)
+        content (.substring line 1 (dec cnt))
+        last-s (reduce #(st/replace % %2 "#") content filters)
+        diff (- cnt (count last-s))]
+    (+ acc diff)))
+
 (defn day8-rex []
+  (let [input (day-input-line-seq 8)]
+    (reduce d8-resolver 0 input)))
+
+(defn- enc-chars
+  "Counts actual number of chars in escaped string"
+  [str]
+  (let [cnt (count str)
+        enc (reduce #(case %2
+                      (\\ \") (+ 2 %)
+                      (inc %)) 2 str)]
+    [cnt enc]))
+
+(defn day8-p2 []
   (let [input (day-input-line-seq 8)]
     (reduce
       (fn [acc line]
-        (let [cnt (count line)
-              content (.substring line 1 (dec cnt))
-              last-s (reduce #(st/replace % %2 "#") content filters)
-              diff (- cnt (count last-s))]
-          (println last-s)
-          (+ acc diff)))
+        (let [[code enc] (enc-chars line)]
+          (+ acc (- enc code))))
       0
       input)))
