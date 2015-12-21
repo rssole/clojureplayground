@@ -207,19 +207,44 @@
 ;for part 2 just place value retrieved for wire a to wire b in input for day 7:)
 
 (def filters [#"(?<dblslsh>\\\\)"
-              #"(?<ascii>\\x[0-9a-f]{2})"
-              #"(?<sinq>\\\")"])
+              #"(?<sinq>\\\")"
+              #"(?<ascii>\\x[0-9a-f]{2})"])
+
+(defn- actual-chars
+  "Counts actual number of chars in escaped string"
+  [str]
+  (let [cnt (count str)
+        content (subs str 1 (dec cnt))]
+    (loop [c content acc 0]
+      (if-let [ch (first c)]
+        (case ch
+          \\ (let [nx (first (rest c))]
+               (case nx
+                 (\\ \") (recur (drop 2 c) (inc acc))
+                 \x (recur (drop 4 c) (inc acc))))
+          (recur (drop 1 c) (inc acc)))
+        [cnt acc]))))
 
 (defn day8 []
   (let [input (day-input-line-seq 8)]
     (reduce
       (fn [acc line]
+        (let [[code mem] (actual-chars line)]
+          (+ acc (- code mem))))
+      0
+      input)))
+
+(def filters [#"(?<dblslsh>\\\\)"
+              #"(?<ascii>\\x[0-9a-f]{2})"
+              #"(?<sinq>\\\")"])
+
+(defn day8-rex []
+  (let [input (day-input-line-seq 8)]
+    (reduce
+      (fn [acc line]
         (let [cnt (count line)
               content (.substring line 1 (dec cnt))
-              [last-s memc] (reduce #(let [prev (first %)
-                                           mc (count (re-seq %2 prev))
-                                           altered (st/replace prev %2 "#")]
-                                      [altered (+ (second %) mc)]) [content 0] filters)
+              last-s (reduce #(st/replace % %2 "#") content filters)
               diff (- cnt (count last-s))]
           (println last-s)
           (+ acc diff)))
