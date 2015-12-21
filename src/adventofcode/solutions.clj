@@ -6,6 +6,8 @@
 
 
 (defn day-x-input [x] (str "adventofcode/day" x "-input"))
+;(defn day-x-input [x] (str "adventofcode/day" x "-input-test"))
+;(defn day-x-input [x] (str "adventofcode/temp.txt"))
 (defn slurp-day-input [x] (slurp (io/file (io/resource (day-x-input x)))))
 (defn day-input-line-seq [x] (line-seq (io/reader (io/resource (day-x-input x)))))
 
@@ -204,3 +206,22 @@
 
 ;for part 2 just place value retrieved for wire a to wire b in input for day 7:)
 
+(def filters [#"(?<dblslsh>\\\\)"
+              #"(?<ascii>\\x[0-9a-f]{2})"
+              #"(?<sinq>\\\")"])
+
+(defn day8 []
+  (let [input (day-input-line-seq 8)]
+    (reduce
+      (fn [acc line]
+        (let [cnt (count line)
+              content (.substring line 1 (dec cnt))
+              [last-s memc] (reduce #(let [prev (first %)
+                                           mc (count (re-seq %2 prev))
+                                           altered (st/replace prev %2 "#")]
+                                      [altered (+ (second %) mc)]) [content 0] filters)
+              diff (- cnt (count last-s))]
+          (println last-s)
+          (+ acc diff)))
+      0
+      input)))
