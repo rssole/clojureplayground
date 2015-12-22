@@ -266,3 +266,13 @@
           (+ acc (- enc code))))
       0
       input)))
+
+(defn day9 []
+  (let [input (day-input-line-seq 9)
+        distances (map #(let [[[_ from to dist]] (re-seq #"^(\w+) to (\w+) = (\d+)$" %)]
+                         [[from to] dist]) input)
+        places (reduce #(let [[[from to] _] %2]
+                         (conj % from to)) #{} distances)]
+    places))
+;TODO the idea is to generate cartesian product (resulting in veeeeery big set :( ) of locations
+;TODO and to go through them....
