@@ -276,3 +276,7 @@
     places))
 ;TODO the idea is to generate cartesian product (resulting in veeeeery big set :( ) of locations
 ;TODO and to go through them....
+
+;(defmacro cart-proddedup [set]
+;  (let [syms (map gensym set)
+;        `(for [~@(reduce #(conj % %2 'set) [])])]))
