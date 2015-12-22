@@ -250,7 +250,7 @@
     (reduce d8-resolver 0 input)))
 
 (defn- enc-chars
-  "Counts actual number of chars in escaped string"
+  "Counts number of chars should string be re-encoded"
   [str]
   (let [cnt (count str)
         enc (reduce #(case %2
