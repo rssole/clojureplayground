@@ -1,0 +1,5 @@
+http://spin.atomicobject.com/2015/12/14/logic-programming-clojure-finite-domain-constraints/?utm_source=twitter-ao&utm_medium=social&utm_campaign=logic-programming-1
+
+http://hubpages.com/technology/Clojure-macro-writing-macros
+
+https://www.booleanknot.com/blog/2015/12/21/encapsulation-and-clojure-part-1.html
