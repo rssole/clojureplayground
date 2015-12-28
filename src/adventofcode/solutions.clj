@@ -289,7 +289,9 @@
             (route-len (first all-routes))
             (rest all-routes))))
 
-(defn day10 [input iterations]
+(defn day10
+  "My input was '1113222113' and 40 and 50 iterations for parts 1 and 2 respectively"
+  [input iterations]
   (count
     (nth
       (iterate
