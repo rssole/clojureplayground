@@ -289,3 +289,13 @@
             (route-len (first all-routes))
             (rest all-routes))))
 
+(defn day10 [input iterations]
+  (count
+    (nth
+      (iterate
+        (fn [x]
+          (clojure.string/join
+            (map #(str (count %) (first %)) (partition-by identity x))))
+        input)
+      iterations)))
+
