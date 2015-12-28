@@ -105,13 +105,13 @@
               input))))
 
 ; day 6
-(defn- s2int [s] (Integer/parseInt s))
+(defn- s->int [s] (Integer/parseInt s))
 
 (def ^{:private true} day6-instruction-regex #"(\w+) (?<x0>\d+),(?<y0>\d+) through (?<x1>\d+),(?<y1>\d+)")
 
 (defn- day6-get-instruction [line]
   (let [[[_ action x0 y0 x1 y1]] (re-seq day6-instruction-regex line)]
-    [(keyword action) (s2int x0) (s2int y0) (s2int x1) (s2int y1)]))
+    [(keyword action) (s->int x0) (s->int y0) (s->int x1) (s->int y1)]))
 
 (def ^{:private true} actions-1 {:off    #(aset-int % %2 %3 0)
                                  :on     #(aset-int % %2 %3 1)
@@ -158,7 +158,7 @@
 
 (defn to-int [s]
   (when (and (not (st/blank? s)) (is-integer s))
-    (s2int s)))
+    (s->int s)))
 
 (defn day-7-get-instruction [line]
   (let [[_ _ _ lw oper rw target] (day7-instr-parts line)
@@ -267,16 +267,25 @@
       0
       input)))
 
-(defn day9 []
-  (let [input (day-input-line-seq 9)
-        distances (map #(let [[[_ from to dist]] (re-seq #"^(\w+) to (\w+) = (\d+)$" %)]
-                         [[from to] dist]) input)
-        places (reduce #(let [[[from to] _] %2]
-                         (conj % from to)) #{} distances)]
-    places))
-;TODO the idea is to generate cartesian product (resulting in veeeeery big set :( ) of locations
-;TODO and to go through them....
+(defn permutations [s]
+  (lazy-seq
+    (if (seq (rest s))
+      (apply concat (for [x s]
+                      (map #(cons x %) (permutations (remove #{x} s)))))
+      [s])))
 
-;(defmacro cart-proddedup [set]
-;  (let [syms (map gensym set)
-;        `(for [~@(reduce #(conj % %2 'set) [])])]))
+(defn day9
+  "Provide min/max as comp-f parameters for parts 1 and 2 respectively"
+  [comp-f]
+  (let [input (day-input-line-seq 9)
+        distances (into {} (map #(let [[[_ from to dist]] (re-seq #"^(\w+) to (\w+) = (\d+)$" %)]
+                          [#{from to} (s->int dist)]) input))
+        places (reduce #(let [[endpoints _] %2]
+                         (conj % (first endpoints) (last endpoints))) #{} distances)
+        all-routes (permutations places)
+        route-len (fn [r] (reduce #(let [dist (distances %2)]
+                                    (+ dist %)) 0 (map set (partition 2 1 r))))]
+    (reduce #(comp-f % (route-len %2))
+            (route-len (first all-routes))
+            (rest all-routes))))
+
