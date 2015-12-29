@@ -301,3 +301,19 @@
         input)
       iterations)))
 
+;day 11
+;just building blocks
+;string into number
+(let [init (BigInteger. (clojure.string/join (map #(format "%03d" %) (map int "vzbxkghb"))))
+      ok? (fn [num]
+            (map #(s->int (apply str %)) (partition 3 (.toString num))))]
+  (ok? (.add init BigInteger/ONE)))
+
+;looking for increasing subsequence
+((fn [input]
+   (reduce #(let [prev (first %)
+                  lnum (last prev)]
+             (if (> %2 lnum)
+               (conj (rest %) (conj prev %2))
+               (conj % [%2]))) [[(first input)]] (rest input)))  '(118 122 98 120 107 103 104 105))
+
