@@ -304,16 +304,54 @@
 ;day 11
 ;just building blocks
 ;string into number
-(let [init (BigInteger. (clojure.string/join (map #(format "%03d" %) (map int "vzbxkghb"))))
-      ok? (fn [num]
-            (map #(s->int (apply str %)) (partition 3 (.toString num))))]
-  (ok? (.add init BigInteger/ONE)))
+(defn- no-iol? [ch-seq]
+  (not-any? #(#{105 108 111} %) ch-seq))
 
-;looking for increasing subsequence
-((fn [input]
-   (reduce #(let [prev (first %)
-                  lnum (last prev)]
-             (if (> %2 lnum)
-               (conj (rest %) (conj prev %2))
-               (conj % [%2]))) [[(first input)]] (rest input)))  '(118 122 98 120 107 103 104 105))
+(defn- s->big-int
+  "Simply transforms string into big integer consisting of concatenated character codes"
+  [s]
+  (BigInteger. (clojure.string/join (map #(format "%03d" %) (map int s)))))
+
+(defn- big-int->ch-seq
+  "Simply transforms big-int into sequence of 3 digit numbers"
+  [num]
+  (map #(s->int (apply str %)) (partition 3 (str num))))
+
+(defn- ch-seq->str
+  "Char sequence (ch here is 8bit int actually)"
+  [chs]
+  (apply str (map char chs)))
+
+(defn- has-distinct-pairs?
+  "Determines if sequence contains two distinct pairs (pairs consist of different chars)"
+  [xs]
+  (let [[one two] (filter #(= 2 (count %)) (partition-by identity xs))]
+    (and one two (not= (first one) (first two)))))
+
+(defn- has-inc-of-three?
+  "Determines if provided input sequence containes increasing straight of at least three letters"
+  [xs]
+  (some
+    #(>= (count %) 3)
+    (reduce #(let [prev (first %)
+                   lnum (last prev)]
+              (if (> %2 lnum)
+                (conj (rest %) (conj prev %2))
+                (conj % [%2]))) [[(first xs)]] (rest xs))))
+
+(defn- all-letters? [chs]
+  (every? #(and (>= % 97) (<= % 122)) chs))
+
+(defn day11 [input]
+  (reduce #(let [ch-seq (big-int->ch-seq %2)]
+            (when (all-letters? ch-seq)
+              (println (ch-seq->str ch-seq))
+              (if (and
+                    (has-inc-of-three? ch-seq)
+                    (no-iol? ch-seq)
+                    (has-distinct-pairs? ch-seq))
+                (reduced (ch-seq->str ch-seq)))))
+          (iterate #(.add % BigInteger/ONE) (s->big-int input))))
+
+
 
