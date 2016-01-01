@@ -279,7 +279,7 @@
   [comp-f]
   (let [input (day-input-line-seq 9)
         distances (into {} (map #(let [[[_ from to dist]] (re-seq #"^(\w+) to (\w+) = (\d+)$" %)]
-                          [#{from to} (s->int dist)]) input))
+                                  [#{from to} (s->int dist)]) input))
         places (reduce #(let [[endpoints _] %2]
                          (conj % (first endpoints) (last endpoints))) #{} distances)
         all-routes (permutations places)
@@ -303,19 +303,13 @@
 
 ;day 11
 ;just building blocks
-;string into number
 (defn- no-iol? [ch-seq]
   (not-any? #(#{105 108 111} %) ch-seq))
 
-(defn- s->big-int
-  "Simply transforms string into big integer consisting of concatenated character codes"
+(defn- s->ch-seq
+  "Turns string into sequence of char (integer) codes"
   [s]
-  (BigInteger. (clojure.string/join (map #(format "%03d" %) (map int s)))))
-
-(defn- big-int->ch-seq
-  "Simply transforms big-int into sequence of 3 digit numbers"
-  [num]
-  (map #(s->int (apply str %)) (partition 3 (str num))))
+  (vec (map int s)))
 
 (defn- ch-seq->str
   "Char sequence (ch here is 8bit int actually)"
@@ -325,33 +319,56 @@
 (defn- has-distinct-pairs?
   "Determines if sequence contains two distinct pairs (pairs consist of different chars)"
   [xs]
-  (let [[one two] (filter #(= 2 (count %)) (partition-by identity xs))]
+  (let [[one two] (take 2 (filter
+                            #(= 2 (count %))
+                            (partition-by identity xs)))]
     (and one two (not= (first one) (first two)))))
 
 (defn- has-inc-of-three?
   "Determines if provided input sequence containes increasing straight of at least three letters"
   [xs]
-  (some
-    #(>= (count %) 3)
-    (reduce #(let [prev (first %)
-                   lnum (last prev)]
-              (if (> %2 lnum)
-                (conj (rest %) (conj prev %2))
-                (conj % [%2]))) [[(first xs)]] (rest xs))))
+  (= 3 (count
+         (reduce #(if (= (dec %2) (last %))
+                   (let [med (conj % %2)]
+                     (if (= 3 (count med))
+                       (reduced med)
+                       med))
+                   [%2]) [(first xs)] (rest xs)))))
 
-(defn- all-letters? [chs]
-  (every? #(and (>= % 97) (<= % 122)) chs))
+;naive inefficient attempt
+;(defn day11 [input]
+;  (let [a0 (first (s->ch-seq input))]
+;    (for [a (range (int a0) 123)
+;          b (range 97 123)
+;          c (range 97 123)
+;          d (range 97 123)
+;          e (range 97 123)
+;          f (range 97 123)
+;          g (range 97 123)
+;          h (range 97 123)
+;          :let [cs [a b c d e f g h]]
+;          :when (and (no-iol? cs)
+;                     (has-inc-of-three? cs)
+;                     (has-distinct-pairs? cs)
+;                     (pos? (compare (ch-seq->str cs) input)))]
+;      cs)))
 
+;quite enough efficient solution
 (defn day11 [input]
-  (reduce #(let [ch-seq (big-int->ch-seq %2)]
-            (when (all-letters? ch-seq)
-              (println (ch-seq->str ch-seq))
-              (if (and
-                    (has-inc-of-three? ch-seq)
-                    (no-iol? ch-seq)
-                    (has-distinct-pairs? ch-seq))
-                (reduced (ch-seq->str ch-seq)))))
-          (iterate #(.add % BigInteger/ONE) (s->big-int input))))
-
+  (reduce #(if (and
+                 (has-inc-of-three? %2)
+                 (no-iol? %2)
+                 (has-distinct-pairs? %2))
+            (reduced (ch-seq->str %2)))
+          (iterate (fn [x]
+                     (if (= 122 (last x))
+                       (let [cnt (count (take-while #(= % 122) (reverse x)))]
+                         (vec (map-indexed #(let [pos (- 7 cnt)]
+                                             (cond
+                                               (= pos %) (inc %2)
+                                               (< % pos) %2
+                                               (> % pos) 97))
+                                           x)))
+                       (assoc x 7 (inc (last x))))) (s->ch-seq input))))
 
 
