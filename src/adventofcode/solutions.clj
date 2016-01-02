@@ -5,7 +5,7 @@
   (:import (java.security MessageDigest)))
 
 
-(defn day-x-input [x] (str "adventofcode/day" x "-input"))
+(defn- day-x-input [x] (str "adventofcode/day" x "-input"))
 ;(defn day-x-input [x] (str "adventofcode/day" x "-input-test"))
 ;(defn day-x-input [x] (str "adventofcode/temp.txt"))
 (defn slurp-day-input [x] (slurp (io/file (io/resource (day-x-input x)))))
@@ -371,4 +371,30 @@
                                            x)))
                        (assoc x 7 (inc (last x))))) (s->ch-seq input))))
 
+;day 12
+;part 1
+;simply:
+(reduce + (map #(s->int %) (re-seq #"\-?\d+" (slurp-day-input 12))))
+
+
+(defn- rm-red-jsobj
+  "Removes single JS object containing property with value 'red'"
+  [input]
+  (let [lr (.lastIndexOf input ":\"red\"")]
+    (when (>= lr 0)
+      (let [llrs (subs input 0 lr)
+            rlrs (subs input lr)
+            ob (.lastIndexOf llrs "{")
+            cb (.indexOf rlrs "}")]
+        (str (subs input 0 ob) (subs rlrs (inc cb)))))))
+
+;TODO: fix this, this is wrong, it is not taking into account that there can be objects
+;prior to "red" valued property which breaks my conception
+(defn day12 [input]
+  (reduce #(if %2
+            %2
+            (reduced (reduce
+                       +
+                       (map
+                         (fn [n] (s->int n)) (re-seq #"\-?\d+" %))))) (iterate rm-red-jsobj input)))
 
