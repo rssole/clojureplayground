@@ -449,8 +449,7 @@
                         #(+ % (deltas %2))
                         0
                         (conj pairs [(ffirst pairs) (last (last pairs))]))))]
-    (reduce
-      #(if (> %2 %) %2 %)
-      (map
-        #(+ (happiness %) (happiness (reverse %)))
-        arrangements))))
+    (apply max
+           (map
+             #(+ (happiness %) (happiness (reverse %)))
+             arrangements))))
