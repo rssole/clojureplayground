@@ -413,8 +413,6 @@
             cb (where-jsobj-ends rlrs)]
         (str (subs input 0 (dec ob)) (subs rlrs (inc cb)))))))
 
-;TODO: fix this, this is wrong, it is not taking into account that there can be objects
-;prior to "red" valued property which breaks my conception
 (defn day12 [input]
   (reduce #(if %2
                 %2
