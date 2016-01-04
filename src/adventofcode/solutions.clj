@@ -376,6 +376,31 @@
 ;simply:
 (reduce + (map #(s->int %) (re-seq #"\-?\d+" (slurp-day-input 12))))
 
+;part 2 a "bit" more involved :)
+(defn- move-on-balance-and-current
+  "a is balance and current position map, fb is function to apply against balance"
+  [a fb]
+  (-> a
+      (update :current inc)
+      (update :balance fb)))
+
+(defn- where-is-first-balanced
+  "Will find first occurence of particular char c which is balanced with it's counterpart ic"
+  [input c ic]
+  (reduce (fn [a x]
+            (condp = x                                       ;why not use "case"? Because case requires compile-time constants!!!
+              ic (move-on-balance-and-current a inc)
+              c (if (pos? (:balance a))
+                  (move-on-balance-and-current a dec)
+                  (reduced a))
+              (move-on-balance-and-current a identity)))
+          {:balance 0 :current 0}
+          input))
+
+(defn- where-jsobj-starts [s]
+  (- (count s) (:current (where-is-first-balanced (reverse s) \{ \}))))
+(defn- where-jsobj-ends [s]
+  (:current (where-is-first-balanced s \} \{)))
 
 (defn- rm-red-jsobj
   "Removes single JS object containing property with value 'red'"
@@ -384,17 +409,17 @@
     (when (>= lr 0)
       (let [llrs (subs input 0 lr)
             rlrs (subs input lr)
-            ob (.lastIndexOf llrs "{")
-            cb (.indexOf rlrs "}")]
-        (str (subs input 0 ob) (subs rlrs (inc cb)))))))
+            ob (where-jsobj-starts llrs)
+            cb (where-jsobj-ends rlrs)]
+        (str (subs input 0 (dec ob)) (subs rlrs (inc cb)))))))
 
 ;TODO: fix this, this is wrong, it is not taking into account that there can be objects
 ;prior to "red" valued property which breaks my conception
 (defn day12 [input]
   (reduce #(if %2
-            %2
-            (reduced (reduce
-                       +
-                       (map
-                         (fn [n] (s->int n)) (re-seq #"\-?\d+" %))))) (iterate rm-red-jsobj input)))
+                %2
+                (reduced (reduce
+                           +
+                           (map
+                             (fn [n] (s->int n)) (re-seq #"\-?\d+" %))))) (iterate rm-red-jsobj input)))
 
