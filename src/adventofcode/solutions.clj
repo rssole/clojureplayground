@@ -388,7 +388,7 @@
   "Will find first occurence of particular char c which is balanced with it's counterpart ic"
   [input c ic]
   (reduce (fn [a x]
-            (condp = x                                       ;why not use "case"? Because case requires compile-time constants!!!
+            (condp = x                                      ;why not use "case"? Because case requires compile-time constants!!!
               ic (move-on-balance-and-current a inc)
               c (if (pos? (:balance a))
                   (move-on-balance-and-current a dec)
@@ -415,9 +415,42 @@
 
 (defn day12 [input]
   (reduce #(if %2
-                %2
-                (reduced (reduce
-                           +
-                           (map
-                             (fn [n] (s->int n)) (re-seq #"\-?\d+" %))))) (iterate rm-red-jsobj input)))
+            %2
+            (reduced (reduce
+                       +
+                       (map
+                         (fn [n] (s->int n)) (re-seq #"\-?\d+" %))))) (iterate rm-red-jsobj input)))
 
+;day 13
+;part 1
+(defn- d13-single-line-extractor
+  "Extracts data from single line of input for day 13"
+  [line]
+  (let [[who1 _ what how-much _ _ _ _ _ _ who2] (re-seq #"\w+\b" line)
+        amount (s->int how-much)
+        delta (if (= what "gain") amount (- amount))]
+    [[who1 who2] delta]))
+
+(defn- d13-persons
+  "Collects all persons present around the round table :)"
+  [deltas]
+  (reduce #(let [[endpoints _] %2]
+            (conj % (first endpoints) (last endpoints))) #{} deltas))
+
+(defn day13
+  [input]
+  "Solves day 13 part 1"
+  (let [deltas (into {} (map d13-single-line-extractor input))
+        persons (d13-persons deltas)
+        arrangements (permutations persons)
+        happiness (fn [members]
+                    (let [pairs (map vec (partition 2 1 members))]
+                      (reduce
+                        #(+ % (deltas %2))
+                        0
+                        (conj pairs [(ffirst pairs) (last (last pairs))]))))]
+    (reduce
+      #(if (> %2 %) %2 %)
+      (map
+        #(+ (happiness %) (happiness (reverse %)))
+        arrangements))))
