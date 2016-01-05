@@ -22,22 +22,22 @@
               val)) [0 0] (slurp-day-input 1)))
 
 ; day 2
-(defn -day2 [f-lwh]
+(defn- dday2 [f-lwh]
   (let [input (day-input-line-seq 2)
         val-ex (fn [s] (map #(Integer/parseInt %) (clojure.string/split s #"x")))]
     (reduce #(let [[l w h] (val-ex %2)]
               (+ % (f-lwh l w h))) 0 input)))
 
 (defn day2 []
-  (-day2 #(let [a (* % %2) b (* %2 %3) c (* % %3) m (min a b c)]
+  (dday2 #(let [a (* % %2) b (* %2 %3) c (* % %3) m (min a b c)]
            (+ (* 2 a) (* 2 b) (* 2 c) m))))
 
 (defn day2-part2 []
-  (-day2 #(let [[a b] (take 2 (sort [% %2 %3]))]
+  (dday2 #(let [[a b] (take 2 (sort [% %2 %3]))]
            (+ (* 2 a) (* 2 b) (* % %2 %3)))))
 
 ; day 3
-(def -move #(case %
+(defn- move #(case %
              \^ [%2 (inc %3)]
              \v [%2 (dec %3)]
              \< [(dec %2) %3]
@@ -47,7 +47,7 @@
   (let [input (slurp-day-input 3)]
     (count
       (second
-        (reduce #(let [[[x y] s] % nval (-move %2 x y)]
+        (reduce #(let [[[x y] s] % nval (move %2 x y)]
                   [nval (conj s nval)])
                 [[0 0] #{[0 0]}]
                 input)))))
@@ -57,7 +57,7 @@
   (let [input (partition 2 (slurp-day-input 3))]
     (count
       (second
-        (reduce #(let [[[[x1 y1] [x2 y2]] s] % nval (-move (first %2) x1 y1) m-nval (-move (second %2) x2 y2)]
+        (reduce #(let [[[[x1 y1] [x2 y2]] s] % nval (move (first %2) x1 y1) m-nval (move (second %2) x2 y2)]
                   [[nval m-nval] (conj s nval m-nval)])
                 [[[0 0] [0 0]] #{[0 0]}]
                 input)))))
@@ -71,7 +71,7 @@
         padding (apply str (repeat (- size (count sig)) "0"))]
     (str padding sig)))
 
-(fn day-4-both-parts []
+(defn day-4-both-parts []
   (let [input "iwrupvqb"]
     (reduce #(let [m5 (md5 (str input %2))]
               (if (.startsWith m5 "00000")                  ;part 2 just asks for one more zero :)
@@ -422,7 +422,7 @@
                          (fn [n] (s->int n)) (re-seq #"\-?\d+" %))))) (iterate rm-red-jsobj input)))
 
 ;day 13
-;part 1
+;parts 1 and 2 (part 2 is about changing input)
 (defn- d13-single-line-extractor
   "Extracts data from single line of input for day 13"
   [line]
@@ -453,3 +453,101 @@
            (map
              #(+ (happiness %) (happiness (reverse %)))
              arrangements))))
+
+;day 14
+;part 1
+(defn- d14-single-line-extractor
+  [line]
+  (let [[n s d r] (map first (re-seq #"(^\w+)|\d+" line))]
+    {:name               n
+     :moment-in-time     1
+     :speed              (s->int s)
+     :duration           (s->int d)
+     :rest               (s->int r)
+     :current-state      :idle
+     :current-state-time 0
+     :distance-travelled 0}))
+
+(defn- move-raindeer
+  [rd]
+  (update rd :distance-travelled #(+ % (:speed rd))))
+
+(defn- go-rest
+  [rd]
+  (-> rd
+      (assoc :current-state :resting)
+      (assoc :current-state-time 1)))
+
+(defn- go-fly
+  [rd]
+  (-> rd
+      (move-raindeer)
+      (assoc :current-state :flying)
+      (assoc :current-state-time 1)))
+
+(defn- simply-fly
+  [rd]
+  (-> rd
+      (move-raindeer)
+      (update :current-state-time inc)))
+
+(defn- simply-rest
+  [rd]
+  (update rd :current-state-time inc))
+
+(defn- transit-rd
+  [rd ref-state f1 f2]
+  (if (< (:current-state-time rd) (get rd ref-state))
+    (f1 rd)
+    (f2 rd)))
+
+(defn- go-raindeer
+  "Raindeer rd calculation"
+  [rd]
+  (let [cs (:current-state rd)
+        transitioned (case cs
+                       :idle (go-fly rd)
+                       :flying (transit-rd rd :duration simply-fly go-rest)
+                       :resting (transit-rd rd :rest simply-rest go-fly))]
+    (update transitioned :moment-in-time inc)))
+
+(defn- d14-part2-reporter
+  [reporter value]
+  (let [key (:moment-in-time value)]
+    (update reporter key #(conj % %2) [(:name value) (:distance-travelled value)])))
+
+(defn- find-max-points [data]
+  (apply max
+         (map second
+              (reduce
+                (fn [a [_ i]]
+                  (let [m (apply max (map second i))
+                        who-has-max (filter #(= m (second %)) i)]
+                    (reduce #(update % (first %2) (fn [v] (if (nil? v) 1 (inc v)))) a who-has-max)))
+                {}
+                data))))
+
+(defn- find-longest-distance-travelled [raindeers]
+  (:distance-travelled (reduce
+                         #(if (> (:distance-travelled %2) (:distance-travelled %)) %2 %)
+                         (first raindeers)
+                         (rest raindeers))))
+
+(defn day14
+  "Expects sequence of lines from file - easily achieved by using day-input-line-seq like (day-input-line-seq 14)"
+  [input]
+  (let [collector (agent (into {} (map #(identity [% []]) (range 2 2504))))
+        watcher (fn [_ _ _ new]
+                  (send collector d14-part2-reporter new))
+        raindeers (map #(let [a (agent (d14-single-line-extractor %))]
+                         (add-watch a :reporter watcher)
+                         a)
+                       input)]
+    (doall
+      (repeatedly 2503 #(doall
+                         (for [r raindeers] (send r go-raindeer)))))
+    (apply await raindeers)
+    (await collector)
+    (let [values (map #(identity @%) raindeers)]
+      {:part1 (find-longest-distance-travelled values)
+       :part2 (find-max-points @collector)})))
