@@ -37,11 +37,11 @@
            (+ (* 2 a) (* 2 b) (* % %2 %3)))))
 
 ; day 3
-(defn- move #(case %
-             \^ [%2 (inc %3)]
-             \v [%2 (dec %3)]
-             \< [(dec %2) %3]
-             \> [(inc %2) %3]))
+(def move #(case %
+            \^ [%2 (inc %3)]
+            \v [%2 (dec %3)]
+            \< [(dec %2) %3]
+            \> [(inc %2) %3]))
 
 (defn day3 []
   (let [input (slurp-day-input 3)]
@@ -353,6 +353,18 @@
 ;                     (pos? (compare (ch-seq->str cs) input)))]
 ;      cs)))
 
+(defn odometer-generator [size lower upper]
+  (fn [x]
+    (if (= upper (last x))
+      (let [cnt (count (take-while #(= % upper) (reverse x)))]
+        (vec (map-indexed #(let [pos (- (dec size) cnt)]
+                            (cond
+                              (= pos %) (inc %2)
+                              (< % pos) %2
+                              (> % pos) lower))
+                          x)))
+      (assoc x (dec size) (inc (last x))))))
+
 ;quite enough efficient solution
 (defn day11 [input]
   (reduce #(if (and
@@ -360,16 +372,7 @@
                  (no-iol? %2)
                  (has-distinct-pairs? %2))
             (reduced (ch-seq->str %2)))
-          (iterate (fn [x]
-                     (if (= 122 (last x))
-                       (let [cnt (count (take-while #(= % 122) (reverse x)))]
-                         (vec (map-indexed #(let [pos (- 7 cnt)]
-                                             (cond
-                                               (= pos %) (inc %2)
-                                               (< % pos) %2
-                                               (> % pos) 97))
-                                           x)))
-                       (assoc x 7 (inc (last x))))) (s->ch-seq input))))
+          (iterate (odometer-generator 8 97 122) (s->ch-seq input))))
 
 ;day 12
 ;part 1
@@ -551,3 +554,7 @@
     (let [values (map #(identity @%) raindeers)]
       {:part1 (find-longest-distance-travelled values)
        :part2 (find-max-points @collector)})))
+
+;day 15
+;preparation
+(filter #(= 100 (apply + %)) (iterate (odometer-generator 4 1 97) [1 1 1 97]))
