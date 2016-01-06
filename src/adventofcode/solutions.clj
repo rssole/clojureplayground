@@ -572,33 +572,29 @@
   (map first (re-seq #"(^\w+)|-?\d+" line)))
 
 ;day 15
-;preparation
-(defn day15
-  "Similarly to previous: expects sequence of lines from file.
-  Easily achieved by using day-input-line-seq like (day-input-line-seq 15)"
-  []
+(defn- day15-basis
+  [f]
   (let [ingredients (into [] (map d15-single-line-extractor (day-input-line-seq 15)))
         prop-val (fn [a i prop]
                    (* a (prop (nth ingredients i))))]
     (apply
       max
-      (map
-        (fn [amounts]
-          (reduce
-            #(* % (if (pos? %2) %2 0))
-            1
-            (reduce
-              #(map
-                (fn [a b] (+ a b)) % %2) [0 0 0 0]
-              (map-indexed
-                (fn [i a]
-                  [(prop-val a i :cap)
-                   (prop-val a i :dur)
-                   (prop-val a i :fla)
-                   (prop-val a i :tex)])
-                amounts))))
-        (filter
-          #(= 100 (apply + %))
-          (take-while
-            #(< (first %) 98)
-            (iterate (odometer-generator 4 1 98) [1 1 1 97])))))))
+      (f
+        (map
+         (fn [amounts]
+           (reduce
+             #(map
+               (fn [a b] (+ a b)) % %2) [0 0 0 0 0]
+             (map-indexed
+               (fn [i a]
+                 [(prop-val a i :cap)
+                  (prop-val a i :dur)
+                  (prop-val a i :fla)
+                  (prop-val a i :tex)
+                  (prop-val a i :cal)])
+               amounts)))
+         (filter
+           #(= 100 (apply + %))
+           (take-while
+             #(< (first %) 98)
+             (iterate (odometer-generator 4 1 98) [1 1 1 97]))))))))
