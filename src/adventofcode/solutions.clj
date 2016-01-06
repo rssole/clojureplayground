@@ -574,6 +574,8 @@
 ;day 15
 (defn- day15-basis
   [f]
+  "Basis for both parts, both require max values but for different subset of values.
+  Function supplied via f is supposed to provide that subset which max will be applied over"
   (let [ingredients (into [] (map d15-single-line-extractor (day-input-line-seq 15)))
         prop-val (fn [a i prop]
                    (* a (prop (nth ingredients i))))]
@@ -600,6 +602,7 @@
               (iterate (odometer-generator 4 1 98) [1 1 1 97]))))))))
 
 (defn- d15-scorer
+  "Simple multiplicator which treats negative values as zeroes as required by day 15"
   [xs]
   (reduce
     (fn [a i]
@@ -619,3 +622,42 @@
                       (filter
                         #(= 500 (last %))
                         all)))))
+
+;day 16
+
+(def ^{:private true} d16-reference
+  {:children    3
+   :cats        7
+   :samoyeds    2
+   :pomeranians 3
+   :akitas      0
+   :vizslas     0
+   :goldfish    5
+   :trees       3
+   :cars        2
+   :perfumes    1})
+
+(defn ^{:private true} d16-single-line-extractor
+  [line]
+  (let [[[_ _ i] & others] (re-seq #"(\w+):? (\d+)" line)]
+    [(s->int i) (reduce #(let [[_ k v] %2]
+                          (into % {(keyword k) (s->int v)})) {} others)]))
+
+(defn ^{:private true} d16-basis
+  [f]
+  (let [input (day-input-line-seq 16)
+        data (mapv d16-single-line-extractor input)]
+    (first
+      (filter f data))))
+
+(defn day16-part1
+  []
+  (d16-basis #(let [[_ props] %]
+               (= props (select-keys d16-reference (keys props))))))
+
+(defn day16-part2
+  []
+  (d16-basis #(let [[_ props] %
+                    cvals (select-keys d16-reference (keys props))
+                    {:keys []}]
+               )))
