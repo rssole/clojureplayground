@@ -441,9 +441,8 @@
             (conj % (first endpoints) (last endpoints))) #{} deltas))
 
 (defn day13
-  [input]
-  "Solves day 13 part 1"
-  (let [deltas (into {} (map d13-single-line-extractor input))
+  []
+  (let [deltas (into {} (map d13-single-line-extractor (day-input-line-seq 13)))
         persons (d13-persons deltas)
         arrangements (permutations persons)
         happiness (fn [members]
@@ -457,11 +456,14 @@
              #(+ (happiness %) (happiness (reverse %)))
              arrangements))))
 
+;factored it out down there in day 15 as similar pattern is used
+(declare name-and-numbers)
+
 ;day 14
 ;part 1
 (defn- d14-single-line-extractor
   [line]
-  (let [[n s d r] (map first (re-seq #"(^\w+)|\d+" line))]
+  (let [[n s d r] (name-and-numbers line)]
     {:name               n
      :moment-in-time     1
      :speed              (s->int s)
@@ -537,9 +539,9 @@
                          (rest raindeers))))
 
 (defn day14
-  "Expects sequence of lines from file - easily achieved by using day-input-line-seq like (day-input-line-seq 14)"
-  [input]
-  (let [collector (agent (into {} (map #(identity [% []]) (range 2 2504))))
+  []
+  (let [input (day-input-line-seq 14)
+        collector (agent (into {} (map #(identity [% []]) (range 2 2504))))
         watcher (fn [_ _ _ new]
                   (send collector d14-part2-reporter new))
         raindeers (map #(let [a (agent (d14-single-line-extractor %))]
@@ -555,6 +557,48 @@
       {:part1 (find-longest-distance-travelled values)
        :part2 (find-max-points @collector)})))
 
+(defn- d15-single-line-extractor
+  [line]
+  (let [[name cap dur fla tex cal] (name-and-numbers line)]
+    {:name name
+     :cap  (s->int cap)
+     :dur  (s->int dur)
+     :fla  (s->int fla)
+     :tex  (s->int tex)
+     :cal  (s->int cal)}))
+
+(defn- name-and-numbers
+  [line]
+  (map first (re-seq #"(^\w+)|-?\d+" line)))
+
 ;day 15
 ;preparation
-(filter #(= 100 (apply + %)) (iterate (odometer-generator 4 1 97) [1 1 1 97]))
+(defn day15
+  "Similarly to previous: expects sequence of lines from file.
+  Easily achieved by using day-input-line-seq like (day-input-line-seq 15)"
+  []
+  (let [ingredients (into [] (map d15-single-line-extractor (day-input-line-seq 15)))
+        prop-val (fn [a i prop]
+                   (* a (prop (nth ingredients i))))]
+    (apply
+      max
+      (map
+        (fn [amounts]
+          (reduce
+            #(* % (if (pos? %2) %2 0))
+            1
+            (reduce
+              #(map
+                (fn [a b] (+ a b)) % %2) [0 0 0 0]
+              (map-indexed
+                (fn [i a]
+                  [(prop-val a i :cap)
+                   (prop-val a i :dur)
+                   (prop-val a i :fla)
+                   (prop-val a i :tex)])
+                amounts))))
+        (filter
+          #(= 100 (apply + %))
+          (take-while
+            #(< (first %) 98)
+            (iterate (odometer-generator 4 1 98) [1 1 1 97])))))))
