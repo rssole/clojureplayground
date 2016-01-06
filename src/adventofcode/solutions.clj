@@ -581,20 +581,41 @@
       max
       (f
         (map
-         (fn [amounts]
-           (reduce
-             #(map
-               (fn [a b] (+ a b)) % %2) [0 0 0 0 0]
-             (map-indexed
-               (fn [i a]
-                 [(prop-val a i :cap)
-                  (prop-val a i :dur)
-                  (prop-val a i :fla)
-                  (prop-val a i :tex)
-                  (prop-val a i :cal)])
-               amounts)))
-         (filter
-           #(= 100 (apply + %))
-           (take-while
-             #(< (first %) 98)
-             (iterate (odometer-generator 4 1 98) [1 1 1 97]))))))))
+          (fn [amounts]
+            (reduce
+              #(map
+                (fn [a b] (+ a b)) % %2) [0 0 0 0 0]
+              (map-indexed
+                (fn [i a]
+                  [(prop-val a i :cap)
+                   (prop-val a i :dur)
+                   (prop-val a i :fla)
+                   (prop-val a i :tex)
+                   (prop-val a i :cal)])
+                amounts)))
+          (filter
+            #(= 100 (apply + %))
+            (take-while
+              #(< (first %) 98)
+              (iterate (odometer-generator 4 1 98) [1 1 1 97]))))))))
+
+(defn- d15-scorer
+  [xs]
+  (reduce
+    (fn [a i]
+      (* a (if (pos? i) i 0)))
+    1
+    (butlast xs)))
+
+(defn day15-part1
+  []
+  (day15-basis (fn [all]
+                 (map
+                   d15-scorer all))))
+(defn day15-part2
+  []
+  (day15-basis (fn [all]
+                 (map d15-scorer
+                      (filter
+                        #(= 500 (last %))
+                        all)))))
