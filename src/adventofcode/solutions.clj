@@ -658,6 +658,12 @@
 (defn day16-part2
   []
   (d16-basis #(let [[_ props] %
-                    cvals (select-keys d16-reference (keys props))
-                    {:keys []}]
-               )))
+                    {:keys [cats trees pomeranians goldfish]} props
+                    {rcats :cats rtrees :trees rpomeranians :pomeranians rgoldfish :goldfish} d16-reference
+                    others (dissoc props :cats :trees :pomeranians :goldfish)]
+               (and
+                 (if cats (> cats rcats) true)
+                 (if trees (> trees rtrees) true)
+                 (if pomeranians (< pomeranians rpomeranians) true)
+                 (if goldfish (< goldfish rgoldfish) true)
+                 (= others (select-keys d16-reference (keys others)))))))
