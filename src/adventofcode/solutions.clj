@@ -671,20 +671,23 @@
 
 ;day 17
 (defn ^{:private true} add-to-each
-  [x & lists]
-  (reduce #(conj % (cons x %2)) [] lists))
+  [x lists]
+  (map #(cons x %) lists))
 
 (defn ^{:private true} listify
   [xs]
   (map list xs))
 
-;todo make this function work
+;I have tried to use [org.clojure/math.combinatorics "0.1.1"]
+;but that didn't work as it gives <unique> combinations when
+;there are repeated elements in source set and I didn't need that.
+;f below is not lazy but who cares right now
 (defn combos
   [xs r]
   (m/match [xs r]
-           [_ 0] [[]]
-           [([] :seq) r] []
-           [_ 1] (listify xs)
+           [_ 0] '(())
+           [xs 1] (listify xs)
+           [([] :seq) r] '()
            [([h & t] :seq) r] (concat (add-to-each h (combos t (dec r))) (combos t r))))
 
 (defn ^{:private true} boundary
@@ -693,12 +696,28 @@
              (reduced %2))
            (range 1 (inc (count conts))))))
 
-(defn day17-part1 []
+(defn ^{:private true} d17-unit-of-work
+  "Simply will create single unit of work in terms that
+  comb-size combinations over containers will be searched
+  for overall volume of 150"
+  [containers]
+  (fn [r]
+    (filter #(= 150 (apply + %))
+            (combos containers r))))
+
+(defn ^{:private true} day17-basis [f]
   (let [containers (map s->int (day-input-line-seq 17))
         max-conts (boundary < containers)
-        min-conts (boundary > containers)]
-    [max-conts min-conts]))
+        min-conts (boundary > containers)
+        valid-combos (pmap (d17-unit-of-work containers) (range min-conts (inc max-conts)))]
+    (f valid-combos)))
 
-;the plan: find all combinations of max-conts..min-conts elements from set of containers
-;and for each such - filter out those whose sum is not 150 :)
-;this will be hell of a work so split it out to futures to be performed in parallel
+(defn day17-part1
+  []
+  (day17-basis (fn [valid-combos]
+                 (apply + (map count valid-combos)))))
+
+(defn day17-part2
+  []
+  (day17-basis (fn [valid-combos]
+                 (count (first valid-combos)))))
