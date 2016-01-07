@@ -1,8 +1,7 @@
 (ns adventofcode.solutions
   (:require [clojure.java.io :as io]
             [clojure.string :as st]
-            [clojure.core.match :as m]
-            [clojure.math.combinatorics :as comb])
+            [clojure.core.match :as m])
   (:import (java.security MessageDigest)))
 
 
@@ -721,3 +720,5 @@
   []
   (day17-basis (fn [valid-combos]
                  (count (first valid-combos)))))
+
+;day 18
