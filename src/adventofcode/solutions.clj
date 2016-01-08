@@ -771,8 +771,8 @@
              100                                            ;iteration count
              ))
 
-;Part 2 is about changed input
-;M
+;Part 2 is about changed input and additional rule
+;Make sure you put # at the grid corners (check out d18-corner-set function)
 (defn d18-part2 []
   (d18-basis (fn [curr cnt-on loc]
                (if ((d18-corner-set 100) loc)
