@@ -724,31 +724,33 @@
 
 ;day 18
 (defn ^{:private true} d18-processor-maker
-  [curr-f]
+  [curr-f grid-size]
   (fn [inp]
-    (for [i (range 0 100) j (range 0 100)
-          :let [curr (get-in inp [i j])
+    (for [i (range 0 grid-size) j (range 0 grid-size)
+          :let [loc [i j]
+                curr (get-in inp loc)
                 surr [[(dec i) (dec j)] [(dec i) j] [(dec i) (inc j)]
                       [i (dec j)]                   [i (inc j)]
                       [(inc i) (dec j)] [(inc i) j] [(inc i) (inc j)]]
                 cnt-on (count (filter #(= \# %) (map #(get-in inp %) surr)))]]
-      (curr-f curr cnt-on [i j]))))
+      (curr-f curr cnt-on loc))))
 
 (defn ^{:private true} d18-step-maker
   "As processor returns flat sequence of processed 'lights',
-  this function takes them back to the vector of vectors.
+  this function creates another one which
+  takes them back to the vector of vectors of appropriate size.
   Therefore, it is quite inefficient but who cares right now.
   It could be improved later"
-  [curr-f]
+  [curr-f grid-size]
   (fn
     [inp]
-    (mapv vec (partition 100 ((d18-processor-maker curr-f) inp)))))
+    (mapv vec (partition grid-size ((d18-processor-maker curr-f grid-size) inp)))))
 
 (defn ^{:private true} d18-basis
-  [f]
+  [curr-f grid-size n]
   (let [inp (mapv #(mapv identity %) (day-input-line-seq 18))
-        hundredth (nth (iterate (d18-step-maker f) inp) 100)]
-    (count (filter #(= \# %) (reduce concat hundredth)))))
+        nth-iteration (nth (iterate (d18-step-maker curr-f grid-size) inp) n)]
+    (count (filter #(= \# %) (reduce concat nth-iteration)))))
 
 (defn ^{:private true} d18-part1-pred
   [curr cnt-on]
@@ -756,12 +758,26 @@
     \# (if (#{2 3} cnt-on) \# \.)
     \. (if (= 3 cnt-on) \# \.)))
 
+(defn ^{:private true} d18-corner-set
+  [grid-size]
+  (let [max-idx (dec grid-size)]
+    #{[0 0] [0 max-idx] [max-idx 0] [max-idx max-idx]}))
+
+;Part 1 is about original input
 (defn d18-part1 []
   (d18-basis (fn [curr cnt-on _]
-               (d18-part1-pred curr cnt-on))))
+               (d18-part1-pred curr cnt-on))
+             100                                            ;grid size
+             100                                            ;iteration count
+             ))
 
+;Part 2 is about changed input
+;M
 (defn d18-part2 []
   (d18-basis (fn [curr cnt-on loc]
-               (if (and (#{[0 0] [0 99] [99 0] [99 99]} loc) (= curr \#))
+               (if ((d18-corner-set 100) loc)
                  \#
-                 (d18-part1-pred curr cnt-on)))))
+                 (d18-part1-pred curr cnt-on)))
+             100                                            ;grid size
+             100                                            ;iteration count
+             ))
