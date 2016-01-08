@@ -704,7 +704,8 @@
     (filter #(= 150 (apply + %))
             (combos containers r))))
 
-(defn ^{:private true} day17-basis [f]
+(defn ^{:private true} day17-basis
+  [f]
   (let [containers (map s->int (day-input-line-seq 17))
         max-conts (boundary < containers)
         min-conts (boundary > containers)
@@ -722,3 +723,45 @@
                  (count (first valid-combos)))))
 
 ;day 18
+(defn ^{:private true} d18-processor-maker
+  [curr-f]
+  (fn [inp]
+    (for [i (range 0 100) j (range 0 100)
+          :let [curr (get-in inp [i j])
+                surr [[(dec i) (dec j)] [(dec i) j] [(dec i) (inc j)]
+                      [i (dec j)]                   [i (inc j)]
+                      [(inc i) (dec j)] [(inc i) j] [(inc i) (inc j)]]
+                cnt-on (count (filter #(= \# %) (map #(get-in inp %) surr)))]]
+      (curr-f curr cnt-on [i j]))))
+
+(defn ^{:private true} d18-step-maker
+  "As processor returns flat sequence of processed 'lights',
+  this function takes them back to the vector of vectors.
+  Therefore, it is quite inefficient but who cares right now.
+  It could be improved later"
+  [curr-f]
+  (fn
+    [inp]
+    (mapv vec (partition 100 ((d18-processor-maker curr-f) inp)))))
+
+(defn ^{:private true} d18-basis
+  [f]
+  (let [inp (mapv #(mapv identity %) (day-input-line-seq 18))
+        hundredth (nth (iterate (d18-step-maker f) inp) 100)]
+    (count (filter #(= \# %) (reduce concat hundredth)))))
+
+(defn ^{:private true} d18-part1-pred
+  [curr cnt-on]
+  (condp = curr
+    \# (if (#{2 3} cnt-on) \# \.)
+    \. (if (= 3 cnt-on) \# \.)))
+
+(defn d18-part1 []
+  (d18-basis (fn [curr cnt-on _]
+               (d18-part1-pred curr cnt-on))))
+
+(defn d18-part2 []
+  (d18-basis (fn [curr cnt-on loc]
+               (if (and (#{[0 0] [0 99] [99 0] [99 99]} loc) (= curr \#))
+                 \#
+                 (d18-part1-pred curr cnt-on)))))
