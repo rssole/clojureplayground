@@ -781,3 +781,15 @@
              100                                            ;grid size
              100                                            ;iteration count
              ))
+
+;day 19
+;failed attempt, I haven't understood task obviously...
+((defn day19 []
+   (let [input (day-input-line-seq 19)
+         size (count input)
+         replacements (map #(let [[_ from to] (first (re-seq #"(\w+) => (\w+)" %))]
+                             [from to]) (take (- size 2) input))
+         src (last input)]
+     [size src replacements]
+     (count (reduce #(let [[from to] %2]
+                      (conj % (clojure.string/replace src from to))) #{} replacements)))))

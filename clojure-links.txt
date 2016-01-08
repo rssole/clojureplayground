@@ -3,3 +3,5 @@ http://spin.atomicobject.com/2015/12/14/logic-programming-clojure-finite-domain-
 http://hubpages.com/technology/Clojure-macro-writing-macros
 
 https://www.booleanknot.com/blog/2015/12/21/encapsulation-and-clojure-part-1.html
+
+https://www.reddit.com/r/Clojure/comments/3zppdn/the_beauty_of_clojure/ discussion of http://danboykis.com/?p=2263 (Component vs Mount)
