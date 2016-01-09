@@ -784,24 +784,35 @@
 
 ;day 19
 (defn ^{:private true} d19-processor [s f t]
-  (let [where (.indexOf s f)
-        so-far (+ where (count f))]
+  (let [where (.indexOf s f)]
     (when (>= where 0)
-      (let [remainder (subs s so-far)]
+      (let [remainder (subs s (inc where))]
         [where (str (subs s 0 where) t remainder) remainder]))))
 
-(defn day19 []
+(defn ^{:private true} d19-input-iterator-maker
+  [src from to]
+  (fn [[_ _ ns]]
+    (when-let [[w rep remainder] (d19-processor ns from to)]
+      (let [src-len (count src)
+            rep-len (count rep)
+            pos-in-src (- src-len rep-len)]
+        [(+ w pos-in-src) (str (subs src 0 w) rep) remainder]))))
+
+(defn ^{:private true} d19-replacements
+  [from to src first-input]
+  (reduce (fn [a v]
+            (if v
+              (conj a (second v))
+              (reduced a))) #{} (iterate (d19-input-iterator-maker src from to) first-input)))
+
+(defn day19
+  []
   (let [input (day-input-line-seq 19)
         size (count input)
         replacements (map #(let [[_ from to] (first (re-seq #"(\w+) => (\w+)" %))]
                             [from to]) (take (- size 2) input))
-        src (last input)
-        [from to] (first replacements)
-        first-input (d19-processor src from to)]
-    (reduce (fn [a v]
-              (if v
-                (conj a (second v))
-                (reduced a))) #{} (iterate (fn [x]
-                                             (let [[_ _ ns] x]
-                                               (when-let [[w rep remainder] (d19-processor ns from to)]
-                                                 [w (str (subs src 0 w) rep) remainder]))) first-input))))
+        src (last input)]
+    (reduce (fn [a [from to]]
+              (let [first-input (d19-processor src from to)]
+                (into a
+                      (d19-replacements from to src first-input)))) #{} replacements)))
