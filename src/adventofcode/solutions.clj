@@ -730,7 +730,7 @@
           :let [loc [i j]
                 curr (get-in inp loc)
                 surr [[(dec i) (dec j)] [(dec i) j] [(dec i) (inc j)]
-                      [i (dec j)]                   [i (inc j)]
+                      [i (dec j)] [i (inc j)]
                       [(inc i) (dec j)] [(inc i) j] [(inc i) (inc j)]]
                 cnt-on (count (filter #(= \# %) (map #(get-in inp %) surr)))]]
       (curr-f curr cnt-on loc))))
@@ -783,13 +783,25 @@
              ))
 
 ;day 19
-;failed attempt, I haven't understood task obviously...
-((defn day19 []
-   (let [input (day-input-line-seq 19)
-         size (count input)
-         replacements (map #(let [[_ from to] (first (re-seq #"(\w+) => (\w+)" %))]
-                             [from to]) (take (- size 2) input))
-         src (last input)]
-     [size src replacements]
-     (count (reduce #(let [[from to] %2]
-                      (conj % (clojure.string/replace src from to))) #{} replacements)))))
+(defn ^{:private true} d19-processor [s f t]
+  (let [where (.indexOf s f)
+        so-far (+ where (count f))]
+    (when (>= where 0)
+      (let [remainder (subs s so-far)]
+        [where (str (subs s 0 where) t remainder) remainder]))))
+
+(defn day19 []
+  (let [input (day-input-line-seq 19)
+        size (count input)
+        replacements (map #(let [[_ from to] (first (re-seq #"(\w+) => (\w+)" %))]
+                            [from to]) (take (- size 2) input))
+        src (last input)
+        [from to] (first replacements)
+        first-input (d19-processor src from to)]
+    (reduce (fn [a v]
+              (if v
+                (conj a (second v))
+                (reduced a))) #{} (iterate (fn [x]
+                                             (let [[_ _ ns] x]
+                                               (when-let [[w rep remainder] (d19-processor ns from to)]
+                                                 [w (str (subs src 0 w) rep) remainder]))) first-input))))
