@@ -783,27 +783,32 @@
              ))
 
 ;day 19
-(defn ^{:private true} d19-processor [s f t]
-  (let [where (.indexOf s f)]
-    (when (>= where 0)
-      (let [remainder (subs s (inc where))]
-        [where (str (subs s 0 where) t remainder) remainder]))))
+(defn ^{:private true} d19-processor-maker
+  [src [^String from to]]
+  (fn [ppos]
+    (when (< ppos (count src))
+      (let [nx-src (subs src ppos)
+            where (.indexOf nx-src from)]
+        (when (>= where 0)
+          (let [next-pos (+ 1 where (- (count src) (count nx-src)))
+                left (subs src 0 ppos)
+                right (str (subs nx-src 0 where) to (subs nx-src (+ where (count from))))]
+            [next-pos (str left right)]))))))
 
 (defn ^{:private true} d19-input-iterator-maker
-  [src from to]
-  (fn [[_ _ ns]]
-    (when-let [[w rep remainder] (d19-processor ns from to)]
-      (let [src-len (count src)
-            rep-len (count rep)
-            pos-in-src (- src-len rep-len)]
-        [(+ w pos-in-src) (str (subs src 0 w) rep) remainder]))))
+  [d19-processor]
+  (fn [[ppos _]]
+    (when-let [outcome (d19-processor ppos)]
+      outcome)))
 
 (defn ^{:private true} d19-replacements
-  [from to src first-input]
+  [processor first-input]
   (reduce (fn [a v]
-            (if v
-              (conj a (second v))
-              (reduced a))) #{} (iterate (d19-input-iterator-maker src from to) first-input)))
+                (if v
+                  (conj a (second v))
+                  (reduced a)))
+              #{}
+              (iterate (d19-input-iterator-maker processor) first-input)))
 
 (defn day19
   []
@@ -812,7 +817,11 @@
         replacements (map #(let [[_ from to] (first (re-seq #"(\w+) => (\w+)" %))]
                             [from to]) (take (- size 2) input))
         src (last input)]
-    (reduce (fn [a [from to]]
-              (let [first-input (d19-processor src from to)]
-                (into a
-                      (d19-replacements from to src first-input)))) #{} replacements)))
+    (disj
+      (reduce (fn [a rep]
+                (let [d19-processor (d19-processor-maker src rep)
+                      first-input (d19-processor 0)]
+                  (into a
+                        (d19-replacements d19-processor first-input)))) #{} replacements)
+      src)
+    ))
