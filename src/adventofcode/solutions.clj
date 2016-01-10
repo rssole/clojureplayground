@@ -810,7 +810,7 @@
               #{}
               (iterate (d19-input-iterator-maker processor) first-input)))
 
-(defn day19
+(defn day19-part1
   []
   (let [input (day-input-line-seq 19)
         size (count input)
@@ -825,3 +825,4 @@
                         (d19-replacements d19-processor first-input)))) #{} replacements)
       src)
     ))
+
