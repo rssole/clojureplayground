@@ -826,3 +826,11 @@
       src)
     ))
 
+;attempt on part 2 - find longest match first etc... (search on subreddit for day 19 part 2)
+(let [input (day-input-line-seq 19)
+      size (count input)
+      replacements (map #(let [[_ from to] (first (re-seq #"(\w+) => (\w+)" %))]
+                          [from to]) (take (- size 2) input))
+      s-reps (sort-by second #(> (count %) (count %2)) replacements)
+      src (last input)]
+  (first (drop-while #(= -1 (.indexOf src (second %))) s-reps)))
