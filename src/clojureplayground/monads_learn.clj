@@ -47,10 +47,12 @@
 
 (defmethod pure List [_ v]
   "Wraps value v in a list"
-  (->List v))
+  ;I've struggled for a while with this as I missed to wrap v into list (or in this case, under the hood - vector)
+  (->List [v]))
 
 ;; it dispatches on the class of the Functor instance passed in the 1st argument
 (defmulti <*> (fn [fs _] (class fs)))
+
 (defmethod <*> List [fs xs]
   "Unwraps the functions in fs, applies them to the Functors in xs, wrapping the result at the end"
   (->List (for [f (:wrapped fs)
