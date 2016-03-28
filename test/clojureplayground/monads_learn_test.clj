@@ -73,4 +73,15 @@
         ;Original example favors thread first macro -> but I think that
         ;in this case this explicit version makes more clear what is going on
         (is (= (<*> (pure List f) (pure List x))
-               (pure List (f x))))))))
+               (pure List (f x))))))
+
+    ;Iterchange
+    ;The result of applying an Applicative Functor u to the pure value of y
+    ; should be the same as taking the Applicative obtained by calling pure
+    ; with a function that applies its argument to y and then applying that to u
+
+    ;Haskell way: u <*> pure y = pure ($ y) <*> u
+    (testing "Interchange"
+      (let [u (pure List #(+ 10 %)) y 50]
+        (is (= (<*> u (pure List y))
+               (<*> (pure List #(% y)) u)))))))
