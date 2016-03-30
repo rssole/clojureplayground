@@ -85,3 +85,32 @@
       (let [u (pure List #(+ 10 %)) y 50]
         (is (= (<*> u (pure List y))
                (<*> (pure List #(% y)) u)))))))
+
+(deftest monoids-learning
+  (let [lmonoid list-monoid
+        lmempty (lmonoid)
+        pmonoid plus-monoid
+        pmempty (pmonoid)]
+
+    ;Identity
+    ;Applying mappend to mempty and a monoid x should be the same as the original x monoid
+
+    ;Haskell way:
+    ; mappend mempty x = x
+    ; mappend x mempty = x
+    (testing "Identity"
+      (is (= 5 (pmonoid pmempty 5)))
+      (is (= '(4) (lmonoid lmempty '(4)))))
+
+    ;Associativity
+    ;Applying mappend to a monoid x and the result of applying mappend to the monoids y and z
+    ; should be the same as first applying mappend to the monoids x and y and then applying
+    ; mappend to the resulting monoid and the monoid z
+
+    ;Haskell way:
+    ; mappend x (mappend y z) = mappend (mappend x y) z
+    (testing "Associativity"
+      (is (= (pmonoid 1 (pmonoid 2 3))
+             (pmonoid (pmonoid 1 2) 3)))
+      (is (= (lmonoid '(1) (lmonoid '(2) '(3)))
+             (lmonoid (lmonoid '(1) '(2)) '(3)))))))
