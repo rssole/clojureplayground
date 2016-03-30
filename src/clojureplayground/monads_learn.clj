@@ -88,16 +88,8 @@
   ([a b]
    (+ a b)))
 
-(plus-monoid)                                               ;; 0 - same as mempty
-(plus-monoid 3 4)                                           ;; 7 - same as mappend
-(reduce plus-monoid [2 3 4])                                ;; 9 - when working with monoids, reduce is the same as mconcat
-
 (defn list-monoid
   ([]
    '())
   ([a b]
    (concat a b)))
-
-(list-monoid)                                               ;; () - remember, same as mempty
-(list-monoid [1 2 3] [4 5 6])                               ;; (1 2 3 4 5 6) - remember, same as mappend
-(reduce list-monoid [[1 2 3] [4 5 6] [7 8 9]])              ;; (1 2 3 4 5 6 7 8 9) - mconcat in action

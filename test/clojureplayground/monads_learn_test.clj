@@ -87,10 +87,18 @@
                (<*> (pure List #(% y)) u)))))))
 
 (deftest monoids-learning
-  (let [lmonoid list-monoid
-        lmempty (lmonoid)
-        pmonoid plus-monoid
-        pmempty (pmonoid)]
+  (let [lmempty (list-monoid)
+        pmempty (plus-monoid)]
+
+    (testing "Monoids concept - plus monoid"
+      (is (= 0 pmempty))
+      (is (= 7 (plus-monoid 3 4)))
+      (is (= 9 (reduce plus-monoid [2 3 4]))))
+
+    (testing "Monoids concept - list monoid"
+      (is (= '() lmempty))
+      (is (= '(1 2 3 4 5 6) (list-monoid [1 2 3] [4 5 6])))
+      (is (= '(1 2 3 4 5 6 7 8 9) (reduce list-monoid [[1 2 3] [4 5 6] [7 8 9]]))))
 
     ;Identity
     ;Applying mappend to mempty and a monoid x should be the same as the original x monoid
@@ -99,8 +107,8 @@
     ; mappend mempty x = x
     ; mappend x mempty = x
     (testing "Identity"
-      (is (= 5 (pmonoid pmempty 5)))
-      (is (= '(4) (lmonoid lmempty '(4)))))
+      (is (= 5 (plus-monoid pmempty 5)))
+      (is (= '(4) (list-monoid lmempty '(4)))))
 
     ;Associativity
     ;Applying mappend to a monoid x and the result of applying mappend to the monoids y and z
@@ -110,7 +118,7 @@
     ;Haskell way:
     ; mappend x (mappend y z) = mappend (mappend x y) z
     (testing "Associativity"
-      (is (= (pmonoid 1 (pmonoid 2 3))
-             (pmonoid (pmonoid 1 2) 3)))
-      (is (= (lmonoid '(1) (lmonoid '(2) '(3)))
-             (lmonoid (lmonoid '(1) '(2)) '(3)))))))
+      (is (= (plus-monoid 1 (plus-monoid 2 3))
+             (plus-monoid (plus-monoid 1 2) 3)))
+      (is (= (list-monoid '(1) (list-monoid '(2) '(3)))
+             (list-monoid (list-monoid '(1) '(2)) '(3)))))))
