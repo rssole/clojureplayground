@@ -17,7 +17,17 @@
 (defn thor-move2 [adj opp theta]
   ((allowed-lines theta) (direction adj opp)))
 
-
+;APU: Init Phase
+(let [inp ["00" "0."]
+      node? #(when (= \0 (.charAt %2 %)) %)
+      nright #(let [x (.indexOf % %2)]
+               (if (>= x 0) [x %3] [-1 -1]))
+      nbottom #()]
+  (map-indexed (fn [y row]
+                 (map-indexed (fn [x c]
+                                (when (node? c x)
+                                  (let [ntb (nbottom (drop (inc y) inp))
+                                        ntr (nright row (inc x) y)]))) row)) inp))
 
 
 
