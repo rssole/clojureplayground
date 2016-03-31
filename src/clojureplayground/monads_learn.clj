@@ -58,3 +58,38 @@
   (->List (for [f (:wrapped fs)
                 x (:wrapped xs)]
             (f x))))
+
+;Monoids
+
+;Simply put, Monoids describe types containing a binary function and an identity value.
+;When applied to the identity value and a random value x, said function leaves its argument x untouched, returning it as a result.
+
+;First - Haskell:
+;class Monoid m where
+; mempty :: m
+; mappend :: m -> m -> m
+; mconcat :: [m] -> m
+; mconcat ms = foldr mappend mempty ms
+
+;mempty - I started with a lie since mempty isn’t actually a function.
+; You can think of it as a constant of the same type of the Monoid m.
+; It is this monoid’s identity value.
+;mappend - A poorly named function,
+; mappend is the binary function I mentioned earlier.
+; It receives two arguments of type m and returns a value of type m
+;mconcat - It receives a list of Monoids m and reduces them to a single Monoid of type m.
+; What’s interesting about this snippet is that the Monoid type class provides a
+; default implementation for mconcat: it simply calls foldr with the binary function mappend,
+; a starting value of mempty and the list of Monoid values ms
+
+(defn plus-monoid
+  ([]
+   0)
+  ([a b]
+   (+ a b)))
+
+(defn list-monoid
+  ([]
+   '())
+  ([a b]
+   (concat a b)))
