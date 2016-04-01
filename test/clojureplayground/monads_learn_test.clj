@@ -122,3 +122,80 @@
              (plus-monoid (plus-monoid 1 2) 3)))
       (is (= (list-monoid '(1) (list-monoid '(2) '(3)))
              (list-monoid (list-monoid '(1) '(2)) '(3)))))))
+
+;Auxiliary functions for monads section
+(defn calculate-shipping-rate [address]
+  (if (= (:country address) "Australia")
+    10.0
+    nil))
+
+(defn apply-shipping-costs [order shipping-rate]
+  (assoc order :total (+ (:total order) shipping-rate)))
+
+(defn lookup-discount-code [code]
+  (if (= code "XMAS2012")
+    5.0
+    nil))
+
+(defn apply-discount-code [order discount]
+  (assoc order :total (- (:total order) discount)))
+
+(defn place [order]
+  (let [value (:total order)]
+    (prn (str "Off you go! Order total: $" value))
+    value))
+
+(def another-order {
+                    :items         [{:name "Jalapeño sauce" :price 20.0}]
+                    :address       {:country "Australia"}
+                    :discount-code "XMAS2012"
+                    :total         20.0
+                    })
+
+(deftest monads-learning
+  (testing "Non-macro usage version"
+    (is (= 25.0 (-> another-order
+                  ((:bind maybe-monad)
+                    (fn [order]
+                      (-> (calculate-shipping-rate (:address order))
+                          ((:bind maybe-monad)
+                            (fn [shipping-rate]
+                              (-> (lookup-discount-code (:discount-code order))
+                                  ((:bind maybe-monad)
+                                    (fn [discount]
+                                      ((:return maybe-monad)
+                                        (-> order
+                                            (apply-shipping-costs shipping-rate)
+                                            (apply-discount-code discount)
+                                            (place))))))))))))))))
+
+(defn monad-steps
+  ([monad steps expr]
+   (if (seq steps)
+     (let [fst (first steps)
+           snd (second steps)]
+       `((:bind ~monad)
+          (fn [~(symbol fst)]
+            (-> ~snd ~(monad-steps monad (subvec steps 2) expr)))))
+     expr)))
+
+
+(defmacro domonad [monad steps expr]
+  (let [args (map first (partition 2 steps))
+        forms (map second (partition 2 steps))
+        new-steps (subvec (vec (interleave (cons nil args) forms)) 2)]
+    `(let [m# ~monad]
+       (-> ~(second steps)
+           ~(monad-steps monad new-steps
+                         `((:bind ~monad) (fn [~(symbol (last args))] ((:return ~monad) ~expr))))))))
+
+(deftest monads-learning-ext
+  (testing "Macro usage version of previous test, after macros are defined"
+    (is (= 25.0 (domonad maybe-monad
+                       [order another-order
+                        shipping-rate (calculate-shipping-rate (:address order))
+                        discount (lookup-discount-code (:discount-code order))]
+                       (-> order
+                           (apply-shipping-costs shipping-rate)
+                           (apply-discount-code discount)
+                           (place)))))))

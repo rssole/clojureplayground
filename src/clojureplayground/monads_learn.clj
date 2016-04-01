@@ -93,3 +93,44 @@
    '())
   ([a b]
    (concat a b)))
+
+;Monads :) TADAAAAAAAAAAAA! :)
+;Quote: "The point is: when we combine Functors/Applicatives/Monads,
+; we carry their context with us to the end - they are essentially sequenced together."
+
+;First - Haskell:
+;class Monad m where
+
+;  return :: a -> m a
+;Responsible for wrapping a value of type a into a minimum context
+; Monad that yields a value of type a - referred to as a monadic value.
+
+;  (>>=) :: m a -> (a -> m b) -> m b AKA "bind"
+;Function of two arguments. The first is a monadic value of type a and
+; the second is a function that receives a value of type a and
+; returns a monadic value of type m b which is also the overall result of the function.
+
+;  (>>) :: m a -> m b -> m b AKA "then" and below is it's default implementation
+;    x >> y = x >>= \_ -> y
+;This function receives two monads, m a and m b, and returns a monad of type m b.
+; It is generally used when you’re interested in the side effects - the context - carried out by the monad m a
+; but doesn’t care about the value a it yields. It’s rarely implemented in specific monads
+; because the type class provides a default implementation:
+; It applies bind to the monad x and a function that ignores its argument (\_ -> y) - which
+; by convention is represented by an underscore - and simply yields the monad y: that’s the final result of the computation.
+
+; Hint: there is "fail" function as well but it is omitted for clarity purposes
+
+(def maybe-monad {
+                  :return (fn [v] v)
+                  :bind   (fn [mv f]
+                            (if mv
+                              (f mv)
+                              nil))})
+
+;For the maybe monad, all its context needs to represent is a single value or
+; the absence of value. We do this inside bind by checking if the monadic value mv is nil.
+; If it isn’t, we apply f to it, which will yield another monadic value.
+; If, on the other hand, mv IS nil, we just return nil, bypassing the function application entirely.
+
+;return, as we saw, wraps a value into a minimal monad. In this case this is the value itself, so we just return it untouched.
