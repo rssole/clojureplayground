@@ -42,26 +42,51 @@
 
 (def s->i #(Integer/parseInt %))
 (def spws #(clojure.string/split % #"\s"))
-(defn node-to-cut [aloc links]
-  (if-let [fc (some #(let [{:keys [f t severed]} %]
-                      (when (and (= f aloc) (zero? t) (false? severed))
-                        %)) links)]
+(defn find-node-by [aloc f]
+  (fn [node]
+    (let [{:keys [from to severed] :as n} node]
+      (f n from to severed aloc))))
+(defn node-to-cut [aloc links egs]
+  (if-let [fc (some (find-node-by aloc #(when (and (= %2 %5) (egs %3) (false? %4))
+                                         %)) links)]
     fc
-    (first (filter #(let [{:keys [f severed]} %]
-                     (and (= f aloc) (false? severed))) links))))
+    (first (filter #(let [{:keys [f t severed]} %]
+                     (and (or (egs f) (egs t)) (false? severed))) links))))
 
 (let [[_ L E] (map s->i (spws (read-line)))
-      [links egs] (split-at (* 2 L) (mapcat #(map s->i (spws %)) (repeatedly (+ E L) read-line)))
+      [links egws] (split-at (* 2 L) (mapcat #(map s->i (spws %)) (repeatedly (+ E L) read-line)))
       lks (vec
             (map-indexed
               #(let [[from to] %2]
                 {:i % :f from :t to :severed false})
-              (partition 2 links)))]
-  (println lks)
+              (partition 2 links)))
+      egs (set egws)]
   (loop [lks0 lks]
-    (let [SI (read) {:keys [i f t] :as fnd} (node-to-cut SI lks0)]
+    (let [SI (read) {:keys [i f t]} (node-to-cut SI lks0 egs)]
       (println f t)
       (recur (update-in lks0 [i :severed] #(identity %2) true)))))
 
-
 ;(println (mapcat #(clojure.string/split % #"\s") (repeatedly 3 read-line)))
+[{:i 0, :f 11, :t 6, :severed false}
+ {:i 1, :f 0, :t 9, :severed false}
+ {:i 2, :f 1, :t 2, :severed false}
+ {:i 3, :f 0, :t 1, :severed false}
+ {:i 4, :f 10, :t 1, :severed false}
+ {:i 5, :f 11, :t 5, :severed false}
+ {:i 6, :f 2, :t 3, :severed false}
+ {:i 7, :f 4, :t 5, :severed false}
+ {:i 8, :f 8, :t 9, :severed false}
+ {:i 9, :f 6, :t 7, :severed false}
+ {:i 10, :f 7, :t 8, :severed false}
+ {:i 11, :f 0, :t 6, :severed false}
+ {:i 12, :f 3, :t 4, :severed false}
+ {:i 13, :f 0, :t 2, :severed false}
+ {:i 14, :f 11, :t 7, :severed false}
+ {:i 15, :f 0, :t 8, :severed false}
+ {:i 16, :f 0, :t 4, :severed false}
+ {:i 17, :f 9, :t 10, :severed false}
+ {:i 18, :f 0, :t 5, :severed false}
+ {:i 19, :f 0, :t 7, :severed false}
+ {:i 20, :f 0, :t 3, :severed false}
+ {:i 21, :f 0, :t 10, :severed false}
+ {:i 22, :f 5, :t 6, :severed false}]
