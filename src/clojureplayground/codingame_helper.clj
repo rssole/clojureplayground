@@ -55,14 +55,12 @@
 (defn skynet-virus [& args]
   (let [[_ L E] (map s->i (spws (read-line)))
         [links egws] (split-at (* 2 L) (mapcat #(map s->i (spws %)) (repeatedly (+ E L) read-line)))
-        lks (vec
-              (map-indexed
-                #(let [[from to] %2]
-                  {:i % :f from :t to})
-                (partition 2 links)))
+        lks (mapv (fn [[from to]]
+                    {:f from :t to})
+                  (partition 2 links))
         egs (set egws)]
     (reduce (fn [ls si]
-              (let [{:keys [i f t]} (node-to-cut si ls egs)]
+              (let [{:keys [f t]} (node-to-cut si ls egs)]
                 (println f t)ls))
             lks
             (repeatedly read))))
