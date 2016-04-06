@@ -42,32 +42,33 @@
 
 (def s->i #(Integer/parseInt %))
 (def spws #(clojure.string/split % #"\s"))
-(defn find-node-by [aloc f]
+(defn find-node-by [aloc pred]
   (fn [node]
-    (let [{:keys [from to severed] :as n} node]
-      (f n from to severed aloc))))
+    (let [{:keys [f t] :as n} node]
+      (pred n aloc f t))))
 (defn node-to-cut [aloc links egs]
-  (if-let [fc (some (find-node-by aloc #(when (and (= %2 %5) (egs %3) (false? %4))
-                                         %)) links)]
+  (if-let [fc (some (find-node-by aloc #(when (or
+                                                (and (= %2 %3) (egs %4))
+                                                (and (= %2 %4) (egs %3))) %)) links)]
     fc
-    (first (filter #(let [{:keys [f t severed]} %]
-                     (and (or (egs f) (egs t)) (false? severed))) links))))
-
-(let [[_ L E] (map s->i (spws (read-line)))
-      [links egws] (split-at (* 2 L) (mapcat #(map s->i (spws %)) (repeatedly (+ E L) read-line)))
-      lks (vec
-            (map-indexed
-              #(let [[from to] %2]
-                {:i % :f from :t to :severed false})
-              (partition 2 links)))
-      egs (set egws)]
-  (loop [lks0 lks]
-    (let [SI (read) {:keys [i f t]} (node-to-cut SI lks0 egs)]
-      (println f t)
-      (recur (update-in lks0 [i :severed] #(identity %2) true)))))
+    (first (filter (find-node-by aloc #(or (egs %4) (egs %3))) links))))
+(defn skynet-virus [& args]
+  (let [[_ L E] (map s->i (spws (read-line)))
+        [links egws] (split-at (* 2 L) (mapcat #(map s->i (spws %)) (repeatedly (+ E L) read-line)))
+        lks (vec
+              (map-indexed
+                #(let [[from to] %2]
+                  {:i % :f from :t to})
+                (partition 2 links)))
+        egs (set egws)]
+    (reduce (fn [ls si]
+              (let [{:keys [i f t]} (node-to-cut si ls egs)]
+                (println f t)ls))
+            lks
+            (repeatedly read))))
 
 ;(println (mapcat #(clojure.string/split % #"\s") (repeatedly 3 read-line)))
-[{:i 0, :f 11, :t 6, :severed false}
+#_[{:i 0, :f 11, :t 6, :severed false}
  {:i 1, :f 0, :t 9, :severed false}
  {:i 2, :f 1, :t 2, :severed false}
  {:i 3, :f 0, :t 1, :severed false}
