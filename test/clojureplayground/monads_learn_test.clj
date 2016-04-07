@@ -149,34 +149,34 @@
                     :items         [{:name "Jalapeño sauce" :price 20.0}]
                     :address       {:country "Australia"}
                     :discount-code "XMAS2012"
-                    :total         20.0
-                    })
+                    :total         20.0})
+
 
 (deftest monads-learning
   (testing "Non-macro usage version"
     (is (= 25.0 (-> another-order
-                  ((:bind maybe-monad)
+                  ((:bind maybe-monad
                     (fn [order]
                       (-> (calculate-shipping-rate (:address order))
-                          ((:bind maybe-monad)
+                          ((:bind maybe-monad
                             (fn [shipping-rate]
                               (-> (lookup-discount-code (:discount-code order))
-                                  ((:bind maybe-monad)
+                                  ((:bind maybe-monad
                                     (fn [discount]
-                                      ((:return maybe-monad)
+                                      ((:return maybe-monad
                                         (-> order
                                             (apply-shipping-costs shipping-rate)
                                             (apply-discount-code discount)
-                                            (place))))))))))))))))
+                                            (place))))))))))))))))))))
 
 (defn monad-steps
   ([monad steps expr]
    (if (seq steps)
      (let [fst (first steps)
            snd (second steps)]
-       `((:bind ~monad)
+       `((:bind ~monad
           (fn [~(symbol fst)]
-            (-> ~snd ~(monad-steps monad (subvec steps 2) expr)))))
+            (-> ~snd ~(monad-steps monad (subvec steps 2) expr))))))
      expr)))
 
 

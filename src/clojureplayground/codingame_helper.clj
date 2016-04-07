@@ -66,7 +66,7 @@
             (repeatedly read))))
 
 ;(println (mapcat #(clojure.string/split % #"\s") (repeatedly 3 read-line)))
-#_[{:i 0, :f 11, :t 6, :severed false}
+#_[{:i 0, :f 11, :t 6, :severed false}]
  {:i 1, :f 0, :t 9, :severed false}
  {:i 2, :f 1, :t 2, :severed false}
  {:i 3, :f 0, :t 1, :severed false}
@@ -88,4 +88,28 @@
  {:i 19, :f 0, :t 7, :severed false}
  {:i 20, :f 0, :t 3, :severed false}
  {:i 21, :f 0, :t 10, :severed false}
- {:i 22, :f 5, :t 6, :severed false}]
+ {:i 22, :f 5, :t 6, :severed false}
+
+; Recurring decimals puzzle
+(fn [n]
+  (let [[l r] (clojure.string/split (str (.doubleValue (/ 1 n))) #"\.")]
+    (if-let [ss (last
+                  (flatten
+                    (filter #(and (>= (count %) 2) (> (count (first (last %))) 1))
+                            (map #(re-seq (re-pattern (str "(" % ")")) r)
+                                 (reductions #(str % %2) "" r)))))])))
+
+
+(defn -main [& args]
+  (let [n (read) [l r] (clojure.string/split (str (.doubleValue (/ 1 n))) #"\.0+")]
+    (binding [*out* *err*](println n))
+    (if-let [ss (last
+                  (flatten
+                    (filter #(and (>= (count %) 2) (> (count (first (last %))) 1))
+                            (map #(re-seq (re-pattern (str "(" % ")")) r)
+                                 (reductions #(str % %2) "" r)))))]
+      (println (str l "." "(" ss ")"))
+      (cond
+        (.contains r "E-") (println "0.")
+        (clojure.string/starts-with? r "00")
+        (println (str l "." "(" r ")"))))))
