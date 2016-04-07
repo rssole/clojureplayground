@@ -91,7 +91,7 @@
  {:i 22, :f 5, :t 6, :severed false}
 
 ; Recurring decimals puzzle
-(fn [n]
+#_(fn [n]
   (let [[l r] (clojure.string/split (str (.doubleValue (/ 1 n))) #"\.")]
     (if-let [ss (last
                   (flatten
@@ -113,3 +113,8 @@
         (.contains r "E-") (println "0.")
         (clojure.string/starts-with? r "00")
         (println (str l "." "(" r ")"))))))
+
+;todo IDEA! 1428571428571428571428571428571429
+;go and build subseq 1 by 1 until you find that
+;string yielded by dropping subseq len of chars
+;begins with already built subseq...
