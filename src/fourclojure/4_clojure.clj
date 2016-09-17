@@ -52,13 +52,20 @@
      (let [sx (str x) [l r] (divide sx)]
        (= (sum l) (sum r))))) 11)
 
-; powerset :S
-(count
-  ((fn [s]
-     (letfn [(subs [s]
-               (for [a s] (disj (set s) a)))]
-       (loop [is s acc #{s}]
-         (let [h (first is) t (disj is h) st (subs is)]
-           (if (not (empty? st))
-             (recur t (into acc (into st (set (for [ss st] (conj ss h))))))
-             acc))))) (into #{} (range 10))))
+;problem 85 - powerset
+; As per "Disc. Math and FP"
+; 1. Pick an element a of A
+; 2. Find the powerset of the set without a, that is A - {a}
+; 3. Find the set formed by adding a to every elelment in the set found in part 2
+; 4. Combine sets found in parts 2 and 3
+(defn powerset [s]
+  (let [h (first s)
+        t (set (rest s))]
+    (if (seq t)
+      (let [s0 (set (powerset t))
+            s1 (set (map #(if (set? %)
+                           (conj % h)
+                           #{h %})
+                         s0))]
+        (concat s0 s1))
+      #{h})))

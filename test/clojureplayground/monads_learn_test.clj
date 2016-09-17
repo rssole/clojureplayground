@@ -146,7 +146,7 @@
     value))
 
 (def another-order {
-                    :items         [{:name "Jalapeño sauce" :price 20.0}]
+                    :items         [{:name "Jalapeï¿½o sauce" :price 20.0}]
                     :address       {:country "Australia"}
                     :discount-code "XMAS2012"
                     :total         20.0})
