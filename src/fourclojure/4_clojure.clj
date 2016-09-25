@@ -59,13 +59,10 @@
 ; 3. Find the set formed by adding a to every elelment in the set found in part 2
 ; 4. Combine sets found in parts 2 and 3
 (defn powerset [s]
-  (let [h (first s)
-        t (set (rest s))]
-    (if (seq t)
-      (let [s0 (set (powerset t))
-            s1 (set (map #(if (set? %)
-                           (conj % h)
-                           #{h %})
-                         s0))]
-        (concat s0 s1))
-      #{h})))
+  (letfn [(go [ls acc]
+            (for [a ls :when (not-empty ls)]
+              (let [ps (go (disj ls a) acc)
+                    cj (for [b ps] (conj b a))]
+                (println ls ps cj)
+                (into acc (into ps cj)))))]
+    (go s #{})))
