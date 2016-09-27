@@ -56,13 +56,15 @@
 ; As per "Disc. Math and FP"
 ; 1. Pick an element a of A
 ; 2. Find the powerset of the set without a, that is A - {a}
-; 3. Find the set formed by adding a to every elelment in the set found in part 2
+; 3. Find the set formed by adding a to every element in the set found in part 2
 ; 4. Combine sets found in parts 2 and 3
+; Well, didn't manage to find correct solution as per above, now trying wikipedia way:
+; https://en.wikipedia.org/wiki/Power_set
+(defn ^:private op-f [e t]
+  (map #(conj % e) t))
+
 (defn powerset [s]
-  (letfn [(go [ls acc]
-            (for [a ls :when (not-empty ls)]
-              (let [ps (go (disj ls a) acc)
-                    cj (for [b ps] (conj b a))]
-                (println ls ps cj)
-                (into acc (into ps cj)))))]
-    (go s #{})))
+  (if (seq s)
+    (for [e s :let [t (powerset (disj s e))]]
+      (clojure.set/union t (op-f e t)))
+    #{#{}}))
