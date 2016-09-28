@@ -60,7 +60,7 @@
 ; 4. Combine sets found in parts 2 and 3
 ; Well, didn't manage to find correct solution as per above, now trying wikipedia way:
 ; https://en.wikipedia.org/wiki/Power_set
-(defn- ^:private op-f [e t]
+(defn- op-f [e t]
   (map #(conj % e) t))
 
 (defn powerset [s]
