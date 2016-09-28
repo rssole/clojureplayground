@@ -68,3 +68,6 @@
     (let [e (first s) t (powerset (disj s e))]
       (clojure.set/union t (map #(conj % e) t)))
     #{#{}}))
+
+(defn tic-tac-toe [board]
+  )
