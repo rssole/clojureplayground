@@ -70,4 +70,6 @@
     #{#{}}))
 
 (defn tic-tac-toe [board]
-  )
+  (let [players (into #{} (apply concat board))]
+    (cond
+      (empty? (rest players)) nil)))
