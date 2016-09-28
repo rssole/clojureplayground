@@ -65,6 +65,6 @@
 
 (defn powerset [s]
   (if (seq s)
-    (for [e s :let [t (powerset (disj s e))]]
-      (clojure.set/union t (op-f e t)))
+    (let [e (first s) t (powerset (disj s e))]
+      (clojure.set/union t (map #(conj % e) t)))
     #{#{}}))
