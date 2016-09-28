@@ -60,13 +60,13 @@
 ; 4. Combine sets found in parts 2 and 3
 ; Well, didn't manage to find correct solution as per above, now trying wikipedia way:
 ; https://en.wikipedia.org/wiki/Power_set
-(defn ^:private op-f [e t]
+(defn- ^:private op-f [e t]
   (map #(conj % e) t))
 
 (defn powerset [s]
   (if (seq s)
     (let [e (first s) t (powerset (disj s e))]
-      (clojure.set/union t (map #(conj % e) t)))
+      (clojure.set/union t (op-f e t)))
     #{#{}}))
 
 (defn tic-tac-toe [board]
