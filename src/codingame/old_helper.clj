@@ -1,4 +1,4 @@
-(ns clojureplayground.codingame-helper
+(ns codingame.old_helper
   (:gen-class))
 
 (defn direction [adj opp]

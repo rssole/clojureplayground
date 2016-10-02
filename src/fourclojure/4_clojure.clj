@@ -1,4 +1,5 @@
-(ns fourclojure.4-clojure)
+(ns fourclojure.4-clojure
+  (:require [clojure.set :as cs]))
 
 ;problem 69 merge with function
 ((fn [f & ms]
@@ -66,7 +67,7 @@
 (defn powerset [s]
   (if (seq s)
     (let [e (first s) t (powerset (disj s e))]
-      (clojure.set/union t (op-f e t)))
+      (cs/union t (op-f e t)))
     #{#{}}))
 
 (defn tic-tac-toe [board]
