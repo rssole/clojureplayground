@@ -1,5 +1,5 @@
 (ns codingame.helper-test
-  (:use midje.sweet)
+  (:use [midje.sweet])
   (:require [codingame.helper :as ch]))
 
 (fact "Balanced ternary computers puzzle says:
