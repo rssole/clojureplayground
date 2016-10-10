@@ -9,4 +9,4 @@
   :profiles {:dev {:dependencies [[midje "1.8.3"]]
                    :plugins [[lein-midje "3.2.1"]]}}
   :plugins [[lein-cljfmt "0.3.0"]]
-  :aliases {"clean-midje" ["do" ["clean"] ["midje"]]})
+  :aliases {"clean-midje" ["do" ["clean"] ["compile"] ["midje"]]})

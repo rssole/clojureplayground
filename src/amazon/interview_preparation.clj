@@ -9,6 +9,9 @@
 (defn selection-sort [s]
   (loop [xs s acc []]
     (if (seq xs)
-      (let [[x i] (smallest xs)]
-        (recur (concat (take i xs) (drop (inc i) xs)) (conj acc x)))
+      (let [[x i] (smallest xs)
+            [l r] (split-at i xs)]
+        (recur (concat l (rest r)) (conj acc x)))
       acc)))
+
+
