@@ -14,4 +14,6 @@
         (recur (concat l (rest r)) (conj acc x)))
       acc)))
 
-
+(defn binary-search [x xs]
+  ;todo come on come on :)
+  )
