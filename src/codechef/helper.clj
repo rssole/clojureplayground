@@ -52,3 +52,14 @@
             :odo
             rev-vec)
         (assoc iv (dec size) lc)))))
+
+(let [gr (Integer/parseInt (read-line))
+      res (for [a (range 1 101) b (range 1 (inc a)) c (range 1 (inc b))
+                :let [sp (/ (+ a b c) 2)
+                      area (Math/sqrt (* sp (- sp a) (- sp b) (- sp c)))
+                      r (/ area sp)]
+                :when (and (> (+ a b) c) (> (+ a c) b) (> (+ b c) a) (== r gr))]
+            (vec (sort [a b c])))]
+  (-> res
+      vec
+      sort))
