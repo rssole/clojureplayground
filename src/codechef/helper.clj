@@ -42,7 +42,9 @@
               butlast
               rev-vec)))
 
-(defn odometer-revisited [init limit]
+(defn an-odometer
+  "Creates odometer counter function with given bounds - limit is inclusive"
+  [init limit]
   (fn [iv]
     (let [size (count iv) lc (inc (last iv))]
       (if (> lc limit)

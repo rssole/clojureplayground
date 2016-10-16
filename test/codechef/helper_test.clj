@@ -10,7 +10,7 @@
                                                         [9 10 17]]})
 
 (facts "odometer should fullfil the following requirements"
-       (let [odometer (ch/odometer-revisited 1 10)]
+       (let [odometer (ch/an-odometer 1 10)]
          (fact "given no counter broke limit just last counter increases"
                (odometer [10 10 10 9]) => [10 10 10 10])
          (fact "given counter broke limit, upper counter should be updated accordingly"
