@@ -1,16 +1,22 @@
 (ns codechef.helper)
 
-;I need actually an sequence which will
-;generate sides starting from [1 1 1] and will
-;once predicate is hit try to reset position which
-;broke the limit to the beginning and increase previous
-;position and so on... until rightmost position breaks limit
-
-
+; I am not very proud of it :) but worked by solution 11654376 so kudos to author
 (defn chef-and-triangles
   "Problem code:LTM40CD"
-  [r]
-  ())
+  []
+  (binding [*unchecked-math* true]
+    (let [r (Integer/parseInt (read-line))
+          ts (for [x (range 1 (inc (* r (Math/sqrt 3))))
+                   y (range (Math/max x (inc (- r x)))
+                            (inc (/ (+ (* 2 r r) (* 2 r (Math/sqrt (+ (* r r) (* x x))))) (* 2 x))))
+                   :let [u (* r r (+ x y))
+                         v (- (* x y) (* r r))
+                         z (when (> v 0) (/ u v))]
+                   :when (and z (== (mod u v) 0) (<= x y) (<= x z) (<= y z))]
+               [(+ x y) (+ x z) (+ y z)])]
+      (println (count ts))
+      (doseq [[a b c] (sort ts)]
+        (println a b c)))))
 
 
 #(let [[a b c] %
@@ -21,11 +27,11 @@
 
 (defn bla-bla-truc []
   (take 20 (map #(let [[a b c] %
-                      s (double (/ (+ a b c) 2))
-                      p (Math/sqrt (* s (- s a) (- s b) (- s c)))
-                      r (/ p s)]
-                 {:inradius r :permiter s :area p :sides %})
-               (iterate #(update-in % [2] inc) [1 1 1]))))
+                       s (double (/ (+ a b c) 2))
+                       p (Math/sqrt (* s (- s a) (- s b) (- s c)))
+                       r (/ p s)]
+                  {:inradius r :permiter s :area p :sides %})
+                (iterate #(update-in % [2] inc) [1 1 1]))))
 
 (def rev-vec (comp vec reverse))
 
@@ -53,13 +59,38 @@
             rev-vec)
         (assoc iv (dec size) lc)))))
 
-(let [gr (Integer/parseInt (read-line))
-      res (for [a (range 1 101) b (range 1 (inc a)) c (range 1 (inc b))
-                :let [sp (/ (+ a b c) 2)
-                      area (Math/sqrt (* sp (- sp a) (- sp b) (- sp c)))
-                      r (/ area sp)]
-                :when (and (> (+ a b) c) (> (+ a c) b) (> (+ b c) a) (== r gr))]
-            (vec (sort [a b c])))]
-  (-> res
-      vec
-      sort))
+'(let [gr (Integer/parseInt (read-line))
+       res (binding [*unchecked-math* false]
+             (for [^int a (range 1 101) ^int b (range 1 (inc a)) ^int c (range 1 (inc b))
+                   :let [sp (/ (+ a b c) 2)
+                         area (Math/sqrt (* sp (- sp a) (- sp b) (- sp c)))
+                         r (/ area sp)]
+                   :when (and (> (+ a b) c) (> (+ a c) b) (> (+ b c) a) (== r gr))]
+               (vec (sort [a b c]))))]
+   (-> res
+       vec
+       sort))
+
+'(binding [*unchecked-math* true]
+   (let [gr (Integer/parseInt (read-line))
+         res (for [^int a (range 1 1001) ^int b (range 1 (inc a)) ^int c (range 1 (inc b))
+                   :let [sp (/ (+ a b c) 2.0)
+                         area (Math/sqrt (* sp (- sp a) (- sp b) (- sp c)))
+                         r (/ area sp)]
+                   :when (and (> (+ a b) c) (> (+ a c) b) (> (+ b c) a) (== r gr))]
+               (vec (sort [a b c])))]
+     (println (count res))
+     (doseq [[a b c] res]
+       (println a b c))))
+
+(defn odometer-generator [size lower upper]
+  (fn [x]
+    (if (= upper (last x))
+      (let [cnt (count (take-while #(= % upper) (reverse x)))]
+        (vec (map-indexed #(let [pos (- (dec size) cnt)]
+                            (cond
+                              (= pos %) (inc %2)
+                              (< % pos) %2
+                              (> % pos) lower))
+                          x)))
+      (assoc x (dec size) (inc (last x))))))
