@@ -1,5 +1,6 @@
 (ns amazon.prime-numbers-fun)
 
+; (c) Dejo Josifovic 2016
 (def is-prime?
   (memoize
     (fn [^Number num] ^Boolean
