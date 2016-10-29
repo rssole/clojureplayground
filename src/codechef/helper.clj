@@ -18,21 +18,6 @@
       (doseq [[a b c] (sort ts)]
         (println a b c)))))
 
-
-#(let [[a b c] %
-       s (/ (+ a b c) 2)
-       p (Math/sqrt (* s (- s a) (- s b) (- s c)))
-       r (/ p s)]
-  (<= r 3))
-
-(defn bla-bla-truc []
-  (take 20 (map #(let [[a b c] %
-                       s (double (/ (+ a b c) 2))
-                       p (Math/sqrt (* s (- s a) (- s b) (- s c)))
-                       r (/ p s)]
-                  {:inradius r :permiter s :area p :sides %})
-                (iterate #(update-in % [2] inc) [1 1 1]))))
-
 (def rev-vec (comp vec reverse))
 
 (defn- update-all-counters [iv init limit]
@@ -58,30 +43,6 @@
             :odo
             rev-vec)
         (assoc iv (dec size) lc)))))
-
-'(let [gr (Integer/parseInt (read-line))
-       res (binding [*unchecked-math* false]
-             (for [^int a (range 1 101) ^int b (range 1 (inc a)) ^int c (range 1 (inc b))
-                   :let [sp (/ (+ a b c) 2)
-                         area (Math/sqrt (* sp (- sp a) (- sp b) (- sp c)))
-                         r (/ area sp)]
-                   :when (and (> (+ a b) c) (> (+ a c) b) (> (+ b c) a) (== r gr))]
-               (vec (sort [a b c]))))]
-   (-> res
-       vec
-       sort))
-
-'(binding [*unchecked-math* true]
-   (let [gr (Integer/parseInt (read-line))
-         res (for [^int a (range 1 1001) ^int b (range 1 (inc a)) ^int c (range 1 (inc b))
-                   :let [sp (/ (+ a b c) 2.0)
-                         area (Math/sqrt (* sp (- sp a) (- sp b) (- sp c)))
-                         r (/ area sp)]
-                   :when (and (> (+ a b) c) (> (+ a c) b) (> (+ b c) a) (== r gr))]
-               (vec (sort [a b c])))]
-     (println (count res))
-     (doseq [[a b c] res]
-       (println a b c))))
 
 (defn odometer-generator [size lower upper]
   (fn [x]
