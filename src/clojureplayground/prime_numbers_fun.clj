@@ -18,7 +18,7 @@
 
 (defn sieve-of-sundaram [n]
   (let [top (inc n)]
-    (map #(inc (* 2 %))
+    (map (comp inc (partial * 2))
          (sort
            (cs/difference (set (range 1 top))
                           (set (for [i (range 1 top) j (range i top)
