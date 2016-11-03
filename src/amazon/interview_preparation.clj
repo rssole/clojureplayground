@@ -17,3 +17,15 @@
 (defn binary-search [x xs]
   ;todo come on come on :)
   )
+
+(defn all-duplicates
+  "Leetcode problem 442. Find All Duplicates in an Array"
+  [xs]
+  (second
+    (reduce (fn [a _]
+              (let [[i acc] a
+                    [l r] (split-at i xs)
+                    n (first r)]
+                (if (some #(= n %) (concat l (rest r)))
+                  [(inc i) (conj acc n)]
+                  [(inc i) acc]))) [0 #{}] xs)))
