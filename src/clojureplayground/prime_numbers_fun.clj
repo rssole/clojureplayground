@@ -46,13 +46,13 @@
 (defn sieve-of-eratosthenes-revisited
   "Based on a work by @paranoidtimes"
   [n]
-  (let [erathostenes (into-array (replicate n true))]
+  (let [erathostenes (transient (vec (replicate n true)))]
     (doseq [i (range 2 (Math/sqrt n))
-            :let [b (aget erathostenes i)]]
+            :let [b (nth erathostenes i)]]
       (if b
         (loop [j (* i i) k 1]
           (if (< j n)
             (do
-              (aset erathostenes j false)
+              (assoc! erathostenes j false)
               (recur (+ (* i i) (* k i)) (inc k)))))))
-    (filter some? (drop 2 (map-indexed #(if %2 % nil) erathostenes)))))
+    (filter some? (map-indexed #(if %2 % nil) (drop 2 (persistent! erathostenes))))))
