@@ -25,3 +25,34 @@
                                      :let [x (+ i j (* 2 i j))]
                                      :while (<= x top)]
                                  x)))))))
+
+(def sieve-of-eratosthenes
+  (memoize (fn [^Number num] (when (> num 1)
+                               (loop [v (into [] (map not (boolean-array num)))
+                                      i 2]
+                                 (if (<= i (Math/sqrt num))
+                                   (if (true? (get v i))
+                                     (recur (loop [vv v
+                                                   j (* i i)]
+                                              (if (<= j num)
+                                                (recur (assoc vv j false) (+ j i))
+                                                vv))
+                                            (inc i))
+                                     (recur v (inc i)))
+                                   (remove nil?
+                                           (map-indexed
+                                             (fn [ind value] (when (and (> ind 1) (true? value)) ind)) v))))))))
+
+(defn sieve-of-eratosthenes-revisited
+  "Based on a work by @paranoidtimes"
+  [n]
+  (let [erathostenes (into-array (replicate n true))]
+    (doseq [i (range 2 (Math/sqrt n))
+            :let [b (aget erathostenes i)]]
+      (if b
+        (loop [j (* i i) k 1]
+          (if (< j n)
+            (do
+              (aset erathostenes j false)
+              (recur (+ (* i i) (* k i)) (inc k)))))))
+    (filter some? (drop 2 (map-indexed #(if %2 % nil) erathostenes)))))
