@@ -44,7 +44,7 @@
                                              (fn [ind value] (when (and (> ind 1) (true? value)) ind)) v))))))))
 
 (defn sieve-of-eratosthenes-revisited
-  "Based on a work by @paranoidtimes"
+  "Based on a work by @theparanoidtimes"
   [n]
   (let [erathostenes (transient (vec (replicate n true)))]
     (doseq [i (range 2 (Math/sqrt n))
