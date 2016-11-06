@@ -2,9 +2,9 @@
 
 (defn- smallest [xs]
   (reduce #(let [[e im ci] %]
-            (if (<= %2 e)
-              [%2 ci (inc ci)]
-              [e im (inc ci)])) [(first xs) 0 0] xs))
+             (if (<= %2 e)
+               [%2 ci (inc ci)]
+               [e im (inc ci)])) [(first xs) 0 0] xs))
 
 (defn selection-sort [s]
   (loop [xs s acc []]
@@ -29,3 +29,25 @@
                 (if (some #(= n %) (concat l (rest r)))
                   [(inc i) (conj acc n)]
                   [(inc i) acc]))) [0 #{}] xs)))
+
+(defn all-duplicates-revisited
+  "Leetcode problem 442. Revisited"
+  [arr]
+  (loop [a arr dups []]
+    (let [[h & t] a]
+      (if t
+        (recur t (if (some #{h} t) (conj dups a) dups))
+        (set dups)))))
+
+; Both above are ridiculously slow
+
+(defn all-duplicates-leetcode-port
+  "Clojure port of accepted solution I did with Java 8"
+  [nums]
+  (map first (filter
+               #(> (second %) 1)
+               (reduce #(if (% %2)
+                          (update % %2 inc)
+                          (assoc % %2 1))
+                       {}
+                       nums))))
