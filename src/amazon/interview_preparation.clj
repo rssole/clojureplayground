@@ -14,9 +14,18 @@
         (recur (concat l (rest r)) (conj acc x)))
       acc)))
 
+; todo: try to implement it via loop/recur to preserve stack space
 (defn binary-search [x xs]
-  ;todo come on come on :)
-  )
+  (letfn [(go [ixs start end]
+            (let [im (int (/ (count ixs) 2))
+                  [l [h & r]] (split-at im ixs)
+                  rstart (+ start im)]
+                (cond
+                  (= h x) rstart
+                  (and (seq r) (> x h)) (go r (inc rstart) end)
+                  (and (seq l) (< x h)) (go l start im)
+                  :else nil)))]
+    (go xs 0 (dec (count xs)))))
 
 (defn all-duplicates
   "Leetcode problem 442. Find All Duplicates in an Array"
