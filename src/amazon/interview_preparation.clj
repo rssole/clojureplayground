@@ -42,21 +42,22 @@
 (defn all-duplicates-revisited
   "Leetcode problem 442. Revisited"
   [arr]
-  (loop [a arr dups []]
+  (loop [a arr dups '()]
     (let [[h & t] a]
       (if t
-        (recur t (if (some #{h} t) (conj dups a) dups))
-        (set dups)))))
+        (recur t (if (some #{h} t) (conj dups h) dups))
+        dups))))
 
 ; Both above are ridiculously slow
 
 (defn all-duplicates-leetcode-port
   "Clojure port of accepted solution I did with Java 8"
   [nums]
-  (map first (filter
-               #(> (second %) 1)
-               (reduce #(if (% %2)
-                          (update % %2 inc)
-                          (assoc % %2 1))
-                       {}
-                       nums))))
+  (sort
+    (mapv first (filter
+                 #(> (second %) 1)
+                 (reduce #(if (% %2)
+                            (update % %2 inc)
+                            (assoc % %2 1))
+                         {}
+                         nums)))))
