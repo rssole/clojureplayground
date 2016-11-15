@@ -20,7 +20,7 @@
   "https://www.hackerrank.com/challenges/maximum-subarray-sum?utm_campaign=challenge-recommendation&utm_medium=email&utm_source=3-day-campaign"
   [n m xs]
   (reduce max
-          (reduce concat (for [i (range 1 (inc n))]
+          (reduce into [] (for [i (range 1 (inc n))]
                           (map #(mod (reduce + %) m) (partition i 1 xs))))))
 
 (defn max-subarray-sum-hr []
