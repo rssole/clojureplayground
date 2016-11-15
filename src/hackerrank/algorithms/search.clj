@@ -20,8 +20,12 @@
   "https://www.hackerrank.com/challenges/maximum-subarray-sum?utm_campaign=challenge-recommendation&utm_medium=email&utm_source=3-day-campaign"
   [n m xs]
   (reduce max
-          (reduce into [] (for [i (range 1 (inc n))]
-                          (map #(mod (reduce + %) m) (partition i 1 xs))))))
+          (reduce into []
+                  (map
+                    (comp deref #(future-call
+                                   (fn []
+                                     (c/sliding-window-map % (fn [win] (mod (reduce + win) m)) xs n))))
+                    (range 1 (inc n))))))
 
 (defn max-subarray-sum-hr []
   "Just wrapped to make it convenient to be run on hackerrank"
