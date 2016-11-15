@@ -16,3 +16,17 @@
   []
   (c/with-test-cases-of-array sherlock-and-array))
 
+(defn max-subarray-sum
+  "https://www.hackerrank.com/challenges/maximum-subarray-sum?utm_campaign=challenge-recommendation&utm_medium=email&utm_source=3-day-campaign"
+  [n m xs]
+  (reduce max
+          (reduce concat (for [i (range 1 (inc n))]
+                          (map #(mod (reduce + %) m) (partition i 1 xs))))))
+
+(defn max-subarray-sum-hr []
+  "Just wrapped to make it convenient to be run on hackerrank"
+  (doseq [_ (range (c/str->int (read-line)))]
+    (let [[n m] (c/str->ints (read-line))
+          xs (c/str->ints (read-line))]
+      (println (max-subarray-sum n m xs)))))
+

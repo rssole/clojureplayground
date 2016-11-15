@@ -18,4 +18,7 @@
        (fact "...here, again, there is no matching element."
              (has/sherlock-and-array [1 2 3]) => nil))
 
+(fact "Maximum Subarray Sum"
+      (has/max-subarray-sum 5 7 [3 3 9 9 5]) => 6)
+
 
