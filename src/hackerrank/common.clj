@@ -25,9 +25,17 @@
 (defn sliding-window-map
   "Applies given function f over sliding window of given win-size took from xs of xs-size.
   This function is aimed for solving HackerRank problem where peformance is a must and not
-  to be pure idiomatic Clojure function"
+  to be pure idiomatic Clojure function.
+  Serves purpose more efficiently than Clojure's partition but not well enough"
   [win-size f ^clojure.lang.PersistentVector xs xs-size]
   (loop [i 0 acc []]
     (if (<= (+ i win-size) xs-size)
       (recur (inc i) (conj acc (f (subvec xs i (+ i win-size)))))
       acc)))
+
+(defn growing-window-map
+  "Applies given function f over raising window, that is,
+  to all subarrays starting at start growing to the end"
+  [f xs]
+  (let [[h & t] xs]
+    (map f (reductions conj [h] t))))

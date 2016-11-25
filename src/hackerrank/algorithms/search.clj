@@ -17,15 +17,12 @@
   (c/with-test-cases-of-array sherlock-and-array))
 
 (defn max-subarray-sum
-  "https://www.hackerrank.com/challenges/maximum-subarray-sum?utm_campaign=challenge-recommendation&utm_medium=email&utm_source=3-day-campaign"
   [n m xs]
-  (reduce max
-          (reduce into []
-                  (map
-                    (comp deref #(future-call
-                                   (fn []
-                                     (c/sliding-window-map % (fn [win] (mod (reduce + win) m)) xs n))))
-                    (range 1 (inc n))))))
+  (let [mf (fn [ys] (mod (reduce + ys) m))]
+    (reduce (fn [a x]
+              (reduce max a (c/growing-window-map mf (subvec xs x))))
+            (mf [(first xs)])
+            (range n))))
 
 (defn max-subarray-sum-hr []
   "Just wrapped to make it convenient to be run on hackerrank"
