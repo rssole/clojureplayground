@@ -17,6 +17,9 @@
   (let [x (first c)
         s (if (= x (last c)) (ch->int x) 0)]
     (reduce + s
-            (map #(ch->int (first %))
+            (map (comp ch->int first)
                  (filter (fn [[a b]] (= a b))
                          (partition 2 1 c))))))
+
+(defn captcha2 [c]
+  (map-indexed #(vector %1 %2) c))
