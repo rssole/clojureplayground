@@ -22,4 +22,6 @@
                          (partition 2 1 c))))))
 
 (defn captcha2 [c]
-  (map-indexed #(vector %1 %2) c))
+  (let [n (count c)
+        d (/ n 2)]
+    (map-indexed #(vector %1 %2) c)))
